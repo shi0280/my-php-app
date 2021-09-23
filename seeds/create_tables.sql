@@ -18,3 +18,9 @@ CREATE TABLE common.todos (
     created_at DATETIME,
     updated_at DATETIME
 );
+
+-- ダミーデータ
+INSERT INTO users (name, email, password, created_at ) VALUES ('test', 'test@test.com', 'testtest',now())；
+INSERT INTO todos (user_id, title, detail, status, deadline_at, created_at) VALUES (1, '資料作成', '会議で使用する資料を作成する', 0, '20210930000000', now())；
+
+UPDATE todos SET title='資料作成' WHERE id=1;
