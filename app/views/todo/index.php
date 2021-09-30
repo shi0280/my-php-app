@@ -1,5 +1,5 @@
 <?php
-require( dirname(__FILE__) . '/../../TodoController.php' );
+require( dirname(__FILE__) . '/../../controllers/TodoController.php' );
 $todoController = new TodoController;
 list($users, $todos) = $todoController->index();
 ?>
