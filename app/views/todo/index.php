@@ -1,7 +1,8 @@
 <?php
 require( dirname(__FILE__) . '/../../controllers/TodoController.php' );
 $todoController = new TodoController;
-list($users, $todos) = $todoController->index();
+$todos = $todoController->index();
+
 ?>
 
 <!DOCTYPE html>
@@ -12,15 +13,6 @@ list($users, $todos) = $todoController->index();
     <title>Todos</title>
 </head>
 <body>
-    <p style="border-bottom: 1px solid #ccc; font-weight:bold;">ユーザー</p>
-    <?php
-        foreach($users as $user){
-            echo 'username: '. $user['name'];
-            echo '<br>';
-            echo 'email: '. $user['email'];
-            echo '<br>';
-        }
-    ?>
     <p style="border-bottom: 1px solid #ccc; font-weight:bold;">ToDo</p>
     <?php
         foreach($todos as $todo){
