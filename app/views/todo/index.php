@@ -1,7 +1,6 @@
 <?php
 require( dirname(__FILE__) . '/../../controllers/TodoController.php' );
-$todoController = new TodoController;
-$todos = $todoController->index();
+$todos = TodoController::index();
 
 ?>
 
