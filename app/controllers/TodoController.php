@@ -1,11 +1,17 @@
 <?php
-require( dirname(__FILE__) . '/../models/Todo.php' );
+require(dirname(__FILE__) . '/../models/Todo.php');
 
-class TodoController{
+class TodoController
+{
+    public static function index()
+    {
+        $todos = Todo::findAll();
+        return $todos;
+    }
 
-    public static function index() {
-        $allTodos = Todo::findAll();
-        return $allTodos;
+    public static function detail()
+    {
+        $todo = Todo::findById();
+        return $todo;
     }
 }
-?>
