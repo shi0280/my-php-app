@@ -11,7 +11,12 @@ class TodoController
 
     public static function detail()
     {
-        $todo = Todo::findById();
+        $id = $_GET['todo_id'];
+        $todo = Todo::findById($id);
+        if (!$todo) {
+            header("location: /../views/error/404.php");
+            return;
+        }
         return $todo;
     }
 }

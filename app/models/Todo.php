@@ -17,12 +17,11 @@ class Todo extends BaseModel
         return $todos;
     }
 
-    public static function findById()
+    public static function findById($id)
     {
         $pdo = parent::connect_db();
         $sql = 'SELECT * FROM todos WHERE id = :id';
         $stmt = $pdo->prepare($sql);
-        $id = 1; // 仮
         $stmt->bindValue(':id', $id, PDO::PARAM_INT);
         $stmt->execute();
         $todo = $stmt->fetch(PDO::FETCH_ASSOC);
