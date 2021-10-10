@@ -1,6 +1,5 @@
 <?php
 require(dirname(__FILE__) . '/BaseModel.php');
-
 class Todo extends BaseModel
 {
 
@@ -27,5 +26,31 @@ class Todo extends BaseModel
         $todo = $stmt->fetch(PDO::FETCH_ASSOC);
 
         return $todo;
+    }
+
+    public static function store($title, $detail, $deadline_at)
+    {
+        $pdo = parent::connect_db();
+        $sql = 'INSERT INTO todos (user_id, title, detail, status, deadline_at, created_at) VALUES (:user_id, :title, :detail, :status, :deadline_at, :created_at）';
+        $stmt = $pdo->prepare($sql);
+
+        $user_id = 1; // 仮
+        $status = 0; //未完了
+        $created_at = date('Y-m-d H:i:s');
+        /* 確認用
+        echo $user_id;
+        echo $title;
+        echo $detail;
+        echo $status;
+        echo $deadline_at;
+        echo $created_at;
+        */
+        $stmt->bindValue(':user_id', $user_id, PDO::PARAM_INT);
+        $stmt->bindValue(':title', $title, PDO::PARAM_STR);
+        $stmt->bindValue(':detail', $detail, PDO::PARAM_STR);
+        $stmt->bindValue(':status', $status, PDO::PARAM_INT);
+        $stmt->bindValue(':deadline_at', $deadline_at, PDO::PARAM_STR);
+        $stmt->bindValue(':created_at', $created_at, PDO::PARAM_STR);
+        $stmt->execute();
     }
 }
