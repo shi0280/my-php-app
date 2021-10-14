@@ -15,7 +15,7 @@ $todos = TodoController::index();
 
 <body>
     <p style="border-bottom: 1px solid #ccc; font-weight:bold;">ToDo</p>
-    <button onclick="location.href='new.php'">新規登録</button><br>
+    <button onclick="location.href='new.php'">新規登録<br></button>
     <?php
     foreach ($todos as $todo) {
         echo '<a href=' . 'detail.php?todo_id=' . $todo['id'] . '> todo: ' . $todo['title'] . '</a>';

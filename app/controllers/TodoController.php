@@ -1,10 +1,7 @@
 <?php
 require(dirname(__FILE__) . '/../models/Todo.php');
 require(dirname(__FILE__) . '/validations/TodoValidation.php');
-
-if (isset($_POST['store'])) {
-    TodoController::store();
-}
+session_start();
 class TodoController
 {
     public static function index()
@@ -28,6 +25,14 @@ class TodoController
         return $todo;
     }
 
+    public static function new()
+    {
+        $input['title'] = $_GET['title'];
+        $input['detail'] = $_GET['detail'];
+        $input['deadline_at'] = $_GET['deadline_at'];
+        return $input;;
+    }
+
     public static function store()
     {
         $title = $_POST['title'];
@@ -35,9 +40,9 @@ class TodoController
         $deadline_at = $_POST['deadline_at'];
 
         $todoValidation = new TodoValidation;
-        if (!$todoValidation->check($title)) {
-            $errors = $todoValidation->getErrorMessages();
-            header("location: /../views/todo/new.php");
+        if (!$todoValidation->check($title, $deadline_at)) {
+            $_SESSION['errors']  = $todoValidation->getErrorMessages();
+            header("location: /../views/todo/new.php?title=" . $title . "&detail=" . $detail . "&deadline_at=" . $deadline_at);
         } else {
             $posts['title'] = $title;
             $posts['detail'] = $detail;
