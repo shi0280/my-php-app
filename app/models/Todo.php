@@ -2,6 +2,27 @@
 require(dirname(__FILE__) . '/BaseModel.php');
 class Todo extends BaseModel
 {
+    protected $title;
+    protected $detail;
+    protected $deadline_at;
+
+    public function setTitle($title)
+    {
+        $this->title = $title;
+    }
+    public function setDetail($detail)
+    {
+        $this->detail = $detail;
+    }
+    public function setDeadline($deadline_at)
+    {
+        $this->deadline_at = $deadline_at;
+    }
+
+    public function save()
+    {
+        $this->store($this->title, $this->detail, $this->deadline_at);
+    }
 
     public static function findAll()
     {

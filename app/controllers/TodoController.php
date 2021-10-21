@@ -1,6 +1,7 @@
 <?php
 require(dirname(__FILE__) . '/../models/Todo.php');
 require(dirname(__FILE__) . '/validations/TodoValidation.php');
+
 session_start();
 class TodoController
 {
@@ -40,15 +41,17 @@ class TodoController
         $deadline_at = $_POST['deadline_at'];
 
         $todoValidation = new TodoValidation;
-        if (!$todoValidation->check($title, $deadline_at)) {
+        if (!$todoValidation->check($title, $detail, $deadline_at)) {
             $_SESSION['errors']  = $todoValidation->getErrorMessages();
             header("location: /../views/todo/new.php?title=" . $title . "&detail=" . $detail . "&deadline_at=" . $deadline_at);
-        } else {
-            $posts['title'] = $title;
-            $posts['detail'] = $detail;
-            $posts['deadline_at'] = $deadline_at;
-            Todo::store($title, $detail, $deadline_at);
-            header("location: /../views/todo/index.php");
+            exit;
         }
+        $data = $todoValidation->getData();
+        $todo = new Todo();
+        $todo->setTitle($data['title']);
+        $todo->setDetail($data['detail']);
+        $todo->setDeadline($data['deadline_at']);
+        $todo->save();
+        header("location: /../views/todo/index.php");
     }
 }

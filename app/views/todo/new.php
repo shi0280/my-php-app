@@ -10,7 +10,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
 if (isset($_SESSION['errors'])) {
     $errors = $_SESSION['errors'];
 }
-//unset($_SESSION['errors']);
+$_SESSION['errors'] = [];
 
 ?>
 
