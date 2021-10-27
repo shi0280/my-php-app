@@ -61,7 +61,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
             <?php endforeach ?>
         <?php endif ?>
         <?php if ($result !== true) : ?>
-            <p class="db_error_message"><?= var_dump($result) ?></p>
+            <p class="db_error_message"><?= $result ?></p>
         <?php endif ?>
     </form>
 </body>
