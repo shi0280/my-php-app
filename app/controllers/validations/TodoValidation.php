@@ -11,7 +11,7 @@ class TodoValidation extends BaseValidation
             $this->errors[] = "タイトルを入力してください。";
         }
 
-        if ($deadline_at !== '' && $deadline_at !== date('Y-m-d H:i:s', strtotime($deadline_at))) {
+        if ($deadline_at !== '' && preg_match('/\A[0-9]{4}-[0-9]{1,2}-[0-9]{1,2}\z/', $deadline_at) == false) {
             $this->errors[] =  "日付の形式が正しくありません。";
         }
 

@@ -33,6 +33,7 @@ $todo = TodoController::detail();
     echo 'created_at: ' . $todo['created_at'];
     echo '<br>';
     ?>
+    <button onclick="location.href='edit.php?todo_id=<?php echo $todo['id']; ?>'">編集</button>
 </body>
 
 </html>
