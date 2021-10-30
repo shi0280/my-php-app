@@ -109,7 +109,7 @@ class Todo extends BaseModel
             $stmt->bindValue(':id', $todo_id, PDO::PARAM_INT);
             $stmt->execute();
         } catch (PDOException $e) {
-            return $e->getMessage() . $status;
+            return $e->getMessage();
         }
 
         return true;
