@@ -13,7 +13,10 @@ $todo = TodoController::detail();
 </head>
 
 <body>
-    <p style="border-bottom: 1px solid #ccc; font-weight:bold;">ToDo詳細</p>
+    <header>
+        <p style="border-bottom: 1px solid #ccc; font-weight:bold;">ToDo詳細</p>
+        <a href="index.php">一覧画面へ</a>
+    </header>
     <?php
     echo 'todo: ' . $todo['title'];
     echo '<br>';
@@ -31,6 +34,8 @@ $todo = TodoController::detail();
     echo 'deadline_at: ' . $todo['deadline_at'];
     echo '<br>';
     echo 'created_at: ' . $todo['created_at'];
+    echo '<br>';
+    echo 'updated_at: ' . $todo['updated_at'];
     echo '<br>';
     ?>
     <button onclick="location.href='edit.php?todo_id=<?php echo $todo['id']; ?>'">編集</button>

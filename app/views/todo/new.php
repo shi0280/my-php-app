@@ -25,7 +25,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
 </head>
 
 <body>
-    <p style="border-bottom: 1px solid #ccc; font-weight:bold;">新規登録</p>
+    <header>
+        <p style="border-bottom: 1px solid #ccc; font-weight:bold;">新規登録</p>
+        <a href="index.php">一覧画面へ</a>
+    </header>
     <form action="new.php" method="post">
         <ul>
             <li></li><label for="title">タイトル:</label></li>

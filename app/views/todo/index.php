@@ -15,12 +15,10 @@ $todos = TodoController::index();
 
 <body>
     <p style="border-bottom: 1px solid #ccc; font-weight:bold;">ToDo</p>
-    <button onclick="location.href='new.php'">新規登録<br></button>
+    <button onclick="location.href='new.php'" style="display:block;">新規登録<br></button>
     <?php
     foreach ($todos as $todo) {
         echo '<a href=' . 'detail.php?todo_id=' . $todo['id'] . '> todo: ' . $todo['title'] . '</a>';
-        echo '<br>';
-        echo 'detail: ' . $todo['detail'];
         echo '<br>';
         switch ($todo['status']) {
             case 0:
@@ -32,8 +30,6 @@ $todos = TodoController::index();
         }
         echo '<br>';
         echo 'deadline_at: ' . $todo['deadline_at'];
-        echo '<br>';
-        echo 'created_at: ' . $todo['created_at'];
         echo '<br>';
     }
     ?>

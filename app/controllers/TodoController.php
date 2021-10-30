@@ -98,17 +98,18 @@ class TodoController
     }
 
 
-    public static function update($todo_id)
+    public static function update()
     {
         $title = $_POST['title'];
         $detail = $_POST['detail'];
         $deadline_at = $_POST['deadline_at'];
         $status = $_POST['status'];
+        $todo_id = $_POST['todo_id'];
 
         $todoValidation = new TodoValidation;
-        if (!$todoValidation->check($title, $detail, $deadline_at)) {
+        if (!$todoValidation->check($title, $detail, $deadline_at, $status)) {
             $_SESSION['errors']  = $todoValidation->getErrorMessages();
-            header("location: /../views/todo/edit.php?todo_id=" . $todo_id . "title=" . $title . "&detail=" . $detail . "&deadline_at=" . $deadline_at . "&status=" . $status);
+            header("location: /../views/todo/edit.php?todo_id=" . $todo_id . "&title=" . $title . "&detail=" . $detail . "&deadline_at=" . $deadline_at . "&status=" . $status);
             exit;
         }
         $data = $todoValidation->getData();
@@ -116,10 +117,11 @@ class TodoController
         $todo->setTitle($data['title']);
         $todo->setDetail($data['detail']);
         $todo->setDeadline($data['deadline_at']);
+        $todo->setStatus($data['status']);
         $result = $todo->save($todo_id);
         if ($result === true) {
             header("location: /../views/todo/index.php");
-            return $result;
+            exit;
         } else {
             return $result;
         }

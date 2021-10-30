@@ -6,7 +6,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
     $todo_id = $_GET['todo_id'];
     list($todo, $input, $errors) = TodoController::edit();
 } else if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    $result = TodoController::update($todo_id);
+    $result = TodoController::update();
 }
 
 ?>
@@ -26,7 +26,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
 </head>
 
 <body>
-    <p style="border-bottom: 1px solid #ccc; font-weight:bold;">編集</p>
+    <header>
+        <p style="border-bottom: 1px solid #ccc; font-weight:bold;">編集</p>
+        <a href="detail.php?todo_id=<?php echo $todo_id ?>">詳細画面へ</a>
+    </header>
     <form action="edit.php" method="post">
         <ul>
             <li></li><label for="title">タイトル:</label></li>
@@ -53,6 +56,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
             <li><input type="radio" name="status" value="1" <?php if ((int)$input['status'] === 1 || (int)$todo['status'] === 1) {
                                                                 echo "checked";
                                                             } ?>>完了</li>
+            <li><input type="hidden" name="todo_id" value="<?php echo $todo_id ?>"></li>
             <li><input type="submit" name="store" value="登録"></li>
         </ul>
         <?php if (isset($errors)) : ?>

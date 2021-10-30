@@ -95,7 +95,7 @@ class Todo extends BaseModel
     {
         try {
             $pdo = parent::connect_db();
-            $sql = 'UPDATE todos SET user_id=:user_id, title=:title, detail=:detail, deadline_at=:deadline_at, status=:status updated_at=now()) 
+            $sql = 'UPDATE todos SET user_id=:user_id, title=:title, detail=:detail, deadline_at=:deadline_at, status=:status, updated_at=now()
                     WHERE id=:id';
             $stmt = $pdo->prepare($sql);
 
@@ -109,7 +109,7 @@ class Todo extends BaseModel
             $stmt->bindValue(':id', $todo_id, PDO::PARAM_INT);
             $stmt->execute();
         } catch (PDOException $e) {
-            return $e->getMessage();
+            return $e->getMessage() . $status;
         }
 
         return true;

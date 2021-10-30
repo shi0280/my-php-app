@@ -5,7 +5,7 @@ class TodoValidation extends BaseValidation
 {
     protected $data;
 
-    public function check($title, $detail, $deadline_at)
+    public function check($title, $detail, $deadline_at, $status = null)
     {
         if ($title === NULL || $title === '') {
             $this->errors[] = "タイトルを入力してください。";
@@ -18,6 +18,12 @@ class TodoValidation extends BaseValidation
         $today = date("Y/m/d");
         if ($deadline_at !== '' && strtotime($today) > strtotime($deadline_at)) {
             $this->errors[] =  "過去の日が入力されています。";
+        }
+
+        if ($status !== null) {
+            if ((int)$status !== 0 && (int)$status !== 1) {
+                $this->errors[] =  "完了か未完了を選択してください。";
+            }
         }
 
         if (count($this->errors) > 0) {
@@ -36,6 +42,7 @@ class TodoValidation extends BaseValidation
         } else {
             $this->data['deadline_at'] = $deadline_at;
         }
+        $this->data['status'] = $status;
 
         return true;
     }
