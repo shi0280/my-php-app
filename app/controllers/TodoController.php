@@ -43,14 +43,16 @@ class TodoController
 
     public static function store()
     {
-        $title = $_POST['title'];
-        $detail = $_POST['detail'];
-        $deadline_at = $_POST['deadline_at'];
+        // データを配列に格納
+        $checkData = array();
+        $checkData['title'] = $_POST['title'];
+        $checkData['detail'] = $_POST['detail'];
+        $checkData['deadline_at'] = $_POST['deadline_at'];
 
         $todoValidation = new TodoValidation;
-        if (!$todoValidation->check($title, $detail, $deadline_at)) {
+        if (!$todoValidation->check($checkData)) {
             $_SESSION['errors']  = $todoValidation->getErrorMessages();
-            header("location: /../views/todo/new.php?title=" . $title . "&detail=" . $detail . "&deadline_at=" . $deadline_at);
+            header("location: /../views/todo/new.php?title=" . $checkData['title'] . "&detail=" . $checkData['detail'] . "&deadline_at=" . $checkData['deadline_at']);
             exit;
         }
         $data = $todoValidation->getData();
@@ -58,11 +60,17 @@ class TodoController
         $todo->setTitle($data['title']);
         $todo->setDetail($data['detail']);
         $todo->setDeadline($data['deadline_at']);
-        $result = $todo->save();
+        try {
+            $result = $todo->save();
+        } catch (Exception $e) {
+            return $e->getMessage();
+        }
+
         if ($result === true) {
             header("location: /../views/todo/index.php");
             return $result;
         } else {
+            $result = "DBの保存に失敗しました。";
             return $result;
         }
     }
@@ -100,16 +108,18 @@ class TodoController
 
     public static function update()
     {
-        $title = $_POST['title'];
-        $detail = $_POST['detail'];
-        $deadline_at = $_POST['deadline_at'];
-        $status = $_POST['status'];
         $todo_id = $_POST['todo_id'];
+        // データを配列に格納
+        $checkData = array();
+        $checkData['title'] = $_POST['title'];
+        $checkData['detail'] = $_POST['detail'];
+        $checkData['deadline_at'] = $_POST['deadline_at'];
+        $checkData['status'] = $_POST['status'];
 
         $todoValidation = new TodoValidation;
-        if (!$todoValidation->check($title, $detail, $deadline_at, $status)) {
+        if (!$todoValidation->check($checkData)) {
             $_SESSION['errors']  = $todoValidation->getErrorMessages();
-            header("location: /../views/todo/edit.php?todo_id=" . $todo_id . "&title=" . $title . "&detail=" . $detail . "&deadline_at=" . $deadline_at . "&status=" . $status);
+            header("location: /../views/todo/edit.php?todo_id=" . $todo_id . "&title=" . $checkData['title'] . "&detail=" . $checkData['detail'] . "&deadline_at=" . $checkData['deadline_at'] . "&status=" . $checkData['status']);
             exit;
         }
         $data = $todoValidation->getData();
@@ -118,11 +128,16 @@ class TodoController
         $todo->setDetail($data['detail']);
         $todo->setDeadline($data['deadline_at']);
         $todo->setStatus($data['status']);
-        $result = $todo->save($todo_id);
+        try {
+            $result = $todo->save($todo_id);
+        } catch (Exception $e) {
+            return $e->getMessage();
+        }
         if ($result === true) {
             header("location: /../views/todo/index.php");
             exit;
         } else {
+            $result = "DBの保存に失敗しました。";
             return $result;
         }
     }

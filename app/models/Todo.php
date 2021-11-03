@@ -52,6 +52,8 @@ class Todo extends BaseModel
         $stmt->execute();
         $todos = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
+        $pdo = null;
+
         return $todos;
     }
 
@@ -63,6 +65,8 @@ class Todo extends BaseModel
         $stmt->bindValue(':id', $id, PDO::PARAM_INT);
         $stmt->execute();
         $todo = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        $pdo = null;
 
         return $todo;
     }
@@ -83,18 +87,25 @@ class Todo extends BaseModel
             $stmt->bindValue(':detail', $detail, PDO::PARAM_STR);
             $stmt->bindValue(':status', $status, PDO::PARAM_INT);
             $stmt->bindValue(':deadline_at', $deadline_at, PDO::PARAM_STR);
-            $stmt->execute();
+            $res = $stmt->execute();
         } catch (PDOException $e) {
-            return $e->getMessage();
+            throw new PDOException("DBエラーです");
+            return false;
+        } finally {
+            // データベースの接続解除
+            $pdo = null;
         }
 
-        return true;
+        return $res; // 成功true 失敗false
     }
 
     public static function update($todo_id, $title, $detail, $deadline_at, $status)
     {
         try {
             $pdo = parent::connect_db();
+            // トランザクション開始
+            $pdo->beginTransaction();
+
             $sql = 'UPDATE todos SET user_id=:user_id, title=:title, detail=:detail, deadline_at=:deadline_at, status=:status, updated_at=now()
                     WHERE id=:id';
             $stmt = $pdo->prepare($sql);
@@ -107,11 +118,21 @@ class Todo extends BaseModel
             $stmt->bindValue(':deadline_at', $deadline_at, PDO::PARAM_STR);
             $stmt->bindValue(':status', $status, PDO::PARAM_INT);
             $stmt->bindValue(':id', $todo_id, PDO::PARAM_INT);
-            $stmt->execute();
+            $res = $stmt->execute();
+            // 成功したらコミット
+            if ($res) {
+                $pdo->commit();
+            }
         } catch (PDOException $e) {
-            return $e->getMessage();
+            // ロールバック
+            $pdo->rollBack();
+            throw new Exception("DBエラーです");
+            return false;
+        } finally {
+            // データベースの接続解除
+            $pdo = null;
         }
 
-        return true;
+        return $res; // 成功true 失敗false
     }
 }

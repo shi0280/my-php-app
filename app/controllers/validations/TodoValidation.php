@@ -5,23 +5,23 @@ class TodoValidation extends BaseValidation
 {
     protected $data;
 
-    public function check($title, $detail, $deadline_at, $status = null)
+    public function check($checkData)
     {
-        if ($title === NULL || $title === '') {
+        if ($checkData['title'] === NULL || $checkData['title'] === '') {
             $this->errors[] = "タイトルを入力してください。";
         }
 
-        if ($deadline_at !== '' && preg_match('/\A[0-9]{4}-[0-9]{1,2}-[0-9]{1,2}\z/', $deadline_at) == false) {
+        if ($checkData['deadline_at'] !== '' && preg_match('/\A[0-9]{4}-[0-9]{1,2}-[0-9]{1,2}\z/', $checkData['deadline_at']) == false) {
             $this->errors[] =  "日付の形式が正しくありません。";
         }
 
         $today = date("Y/m/d");
-        if ($deadline_at !== '' && strtotime($today) > strtotime($deadline_at)) {
+        if ($checkData['deadline_at'] !== '' && strtotime($today) > strtotime($checkData['deadline_at'])) {
             $this->errors[] =  "過去の日が入力されています。";
         }
 
-        if ($status !== null) {
-            if ((int)$status !== 0 && (int)$status !== 1) {
+        if (array_key_exists('status', $checkData)) {
+            if ((int)$checkData['status'] !== 0 && (int)$checkData['status'] !== 1) {
                 $this->errors[] =  "完了か未完了を選択してください。";
             }
         }
@@ -31,18 +31,20 @@ class TodoValidation extends BaseValidation
         }
 
         // バリデーションOKなら入力された値を保存
-        $this->data['title'] = $title;
-        if ($detail === '') {
+        $this->data['title'] = $checkData['title'];
+        if ($checkData['detail'] === '') {
             $this->data['detail'] = NULL;
         } else {
-            $this->data['detail'] = $detail;
+            $this->data['detail'] = $checkData['detail'];
         }
-        if ($deadline_at === '') {
+        if ($checkData['deadline_at'] === '') {
             $this->data['deadline_at'] = NULL;
         } else {
-            $this->data['deadline_at'] = $deadline_at;
+            $this->data['deadline_at'] = $checkData['deadline_at'];
         }
-        $this->data['status'] = $status;
+        if (array_key_exists('status', $checkData)) {
+            $this->data['status'] = $checkData['status'];
+        }
 
         return true;
     }
