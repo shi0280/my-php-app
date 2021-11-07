@@ -141,4 +141,17 @@ class TodoController
             return $result;
         }
     }
+
+    public static function update_status($todo_id, $status)
+    {
+        try {
+            $result = Todo::update_status($todo_id, $status);
+        } catch (Exception $e) {
+            return $e->getMessage();
+        }
+        if ($result === false) {
+            $result = "DBの保存に失敗しました。";
+        }
+        return $result;
+    }
 }

@@ -135,4 +135,34 @@ class Todo extends BaseModel
 
         return $res; // 成功true 失敗false
     }
+
+    public static function update_status($todo_id, $status)
+    {
+        try {
+            $pdo = parent::connect_db();
+            // トランザクション開始
+            $pdo->beginTransaction();
+
+            $sql = 'UPDATE todos SET status=:status, updated_at=now() WHERE id=:id';
+            $stmt = $pdo->prepare($sql);
+
+            $stmt->bindValue(':status', $status, PDO::PARAM_INT);
+            $stmt->bindValue(':id', $todo_id, PDO::PARAM_INT);
+            $res = $stmt->execute();
+            // 成功したらコミット
+            if ($res) {
+                $pdo->commit();
+            }
+        } catch (PDOException $e) {
+            // ロールバック
+            $pdo->rollBack();
+            throw new Exception("DBエラーです");
+            return false;
+        } finally {
+            // データベースの接続解除
+            $pdo = null;
+        }
+
+        return $res; // 成功true 失敗false
+    }
 }
