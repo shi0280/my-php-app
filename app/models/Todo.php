@@ -165,4 +165,33 @@ class Todo extends BaseModel
 
         return $res; // 成功true 失敗false
     }
+
+    public static function delete($todo_id)
+    {
+        try {
+            $pdo = parent::connect_db();
+            // トランザクション開始
+            $pdo->beginTransaction();
+
+            $sql = 'DELETE FROM todos WHERE id=:id';
+            $stmt = $pdo->prepare($sql);
+
+            $stmt->bindValue(':id', $todo_id, PDO::PARAM_INT);
+            $res = $stmt->execute();
+            // 成功したらコミット
+            if ($res) {
+                $pdo->commit();
+            }
+        } catch (PDOException $e) {
+            // ロールバック
+            $pdo->rollBack();
+            throw new Exception("DBエラーです");
+            return false;
+        } finally {
+            // データベースの接続解除
+            $pdo = null;
+        }
+
+        return $res; // 成功true 失敗false
+    }
 }

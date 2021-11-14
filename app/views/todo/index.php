@@ -30,6 +30,7 @@ $todos = TodoController::index();
                 break;
         }
         echo 'deadline_at: ' . $todo['deadline_at'];
+        echo '<button class=delete_todo' . ' data-todo_id=' . $todo['id'] . '>削除</button>';
         echo '<br></div>';
     }
     ?>
@@ -52,16 +53,48 @@ $todos = TodoController::index();
             })
             // 成功
             .done(function(data) {
-                if (data === true) {
+                console.log(data);
+                if (data['result'] === "sccess") {
                     let div_id = "todo-item" + todo_id;
                     $('#' + div_id + ' p').text("完了");
                 } else {
-                    alert(data);
+                    alert(data['msg']);
                 }
 
             }).fail(function(XMLHttpRequest, status, e) {
                 alert(e);
             });
+    });
+
+    $(document).on('click', '.delete_todo', function() {
+
+        let todo_id = $(this).data('todo_id');
+        alert(todo_id);
+
+        // updateStatus.phpファイルへのアクセス
+        $.ajax({
+                type: "POST",
+                url: "../api/deleteTodo.php",
+                data: {
+                    todo_id: $(this).data('todo_id'),
+                    status: $(this).val()
+                },
+                dataType: 'json'
+            })
+            // 成功
+            .done(function(data) {
+                console.log(data);
+                if (data['result'] === "sccess") {
+                    let div_id = "todo-item" + todo_id;
+                    $('#' + div_id).remove();
+                } else {
+                    alert(data['msg']);
+                }
+
+            }).fail(function(XMLHttpRequest, status, e) {
+                alert(e);
+            });
+
     });
 </script>
 
