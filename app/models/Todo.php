@@ -71,6 +71,22 @@ class Todo extends BaseModel
         return $todo;
     }
 
+    public static function findList($status)
+    {
+        $pdo = parent::connect_db();
+        $sql = 'SELECT * FROM todos WHERE user_id = :user_id and status = :status';
+        $stmt = $pdo->prepare($sql);
+        $user_id = 1; // 仮
+        $stmt->bindValue(':user_id', $user_id, PDO::PARAM_INT);
+        $stmt->bindValue(':status', $status, PDO::PARAM_INT);
+        $stmt->execute();
+        $todos = $stmt->fetchALL(PDO::FETCH_ASSOC);
+
+        $pdo = null;
+
+        return $todos;
+    }
+
     public static function store($title, $detail, $deadline_at)
     {
         try {

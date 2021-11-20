@@ -1,7 +1,6 @@
 <?php
 require(dirname(__FILE__) . '/../../controllers/TodoController.php');
 $todos = TodoController::index();
-
 ?>
 
 <!DOCTYPE html>
@@ -15,8 +14,17 @@ $todos = TodoController::index();
 </head>
 
 <body>
-    <p style="border-bottom: 1px solid #ccc; font-weight:bold;">ToDo</p>
-    <button onclick="location.href='new.php'" style="display:block;">新規登録<br></button>
+    <header>
+        <p style="border-bottom: 1px solid #ccc; font-weight:bold;">ToDo</p>
+        <button onclick="location.href='new.php'" style="display:block;">新規登録<br></button>
+        <form action="index.php" method="get">
+            <input type="radio" id="uncompleted" name="status" value="0">
+            <label for="uncompleted">未完了</label>
+            <input type="radio" id="completed" name="status" value="1">
+            <label for="completed">完了</label>
+            <input type="submit" name="search-submit" value="検索">
+        </form>
+    </header>
     <?php
     foreach ($todos as $todo) {
         echo '<div id=todo-item' . $todo['id'] . ' style="background-color:#f0f0f0; padding:10px; margin:10px"><a href=' . 'detail.php?todo_id=' . $todo['id'] . '> todo: ' . $todo['title'] . '</a>';

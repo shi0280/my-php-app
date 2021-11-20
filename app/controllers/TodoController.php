@@ -7,7 +7,12 @@ class TodoController
 {
     public static function index()
     {
-        $todos = Todo::findAll();
+        $status = $_GET['status'];
+        if (isset($status)) {
+            $todos = Todo::findList($status);
+        } else {
+            $todos = Todo::findAll();
+        }
         return $todos;
     }
 
