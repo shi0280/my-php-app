@@ -22,6 +22,8 @@ $todos = TodoController::index();
             <label for="uncompleted">未完了</label>
             <input type="radio" id="completed" name="status" value="1">
             <label for="completed">完了</label>
+            <input type="text" id="search-word" name="search-word">
+            <label for="search-word">検索ワード</label>
             <input type="submit" name="search-submit" value="検索">
         </form>
     </header>
