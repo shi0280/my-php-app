@@ -7,29 +7,33 @@ class TodoController
 {
     public static function index()
     {
-        $status = $_GET['status'];
-        $search_word = $_GET['search-word'];
-        // 検索がない場合
-        if (!isset($status) && !isset($search_word)) {
-            $todos = Todo::findAll();
-            return $todos;
-        }
-
-        // 検索がある場合
-        if (isset($status) && isset($search_word)) {
-            $sql = 'SELECT * FROM todos WHERE user_id = :user_id 
-                and status =' . $status .
-                ' and title LIKE "%' . $search_word . '%"';
-        } else if (isset($search_word)) {
-            $sql = 'SELECT * FROM todos WHERE user_id = :user_id 
-                    and title LIKE "%' . $search_word . '%"';
-        } else if (isset($status)) {
-            $sql = 'SELECT * FROM todos WHERE user_id = :user_id 
-                    and status =' . $status;
-        }
-        $todos = Todo::findByQuery($sql);
-
+        list($sql, $placeholder) = self::buildQuery();
+        $todos = Todo::findByQuery($sql, $placeholder);
         return $todos;
+    }
+
+    private static function buildQuery()
+    {
+        $status = $_GET['status'];
+        $title = $_GET['search-word'];
+
+        $sql =  'SELECT * FROM todos WHERE user_id = :user_id ';
+        $where = '';
+        $placeholder = [];
+
+        if ($title !== null && $title !== '') {
+            $where .= ' and title LIKE :title';
+            $placeholder[":title"] = "%" . $title . "%";
+        }
+        if ($status !== null && $status !== '') {
+            $where  .= ' and status = :status;';
+            $placeholder[":status"] = $status;
+        }
+        if ($where !== null && $where !== '') {
+            $sql .= $where;
+        }
+
+        return [$sql, $placeholder];
     }
 
     public static function detail()

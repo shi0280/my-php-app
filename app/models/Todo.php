@@ -71,12 +71,15 @@ class Todo extends BaseModel
         return $todo;
     }
 
-    public static function findByQuery($sql)
+    public static function findByQuery($sql, $placeholder)
     {
         $pdo = parent::connect_db();
         $stmt = $pdo->prepare($sql);
         $user_id = 1; // 仮
         $stmt->bindValue(':user_id', $user_id, PDO::PARAM_INT);
+        foreach ($placeholder as $key => $value) {
+            $stmt->bindValue($key, $value, PDO::PARAM_STR);
+        }
         $stmt->execute();
         $todos = $stmt->fetchALL(PDO::FETCH_ASSOC);
 
