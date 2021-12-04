@@ -7,32 +7,57 @@ class TodoController
 {
     public static function index()
     {
-        list($sql, $placeholder) = self::buildQuery();
+        $status = $_GET['status'];
+        $title = $_GET['search-word'];
+
+        $sql_items = array();
+
+        if ($title) {
+            $title_sql = [
+                'type' => 'like',
+                'column' => 'title',
+                'value' => $title
+            ];
+            $sql_items[] = $title_sql;
+        }
+
+        if ($status !== null && $status !== '') {
+            $status_sql = [
+                'type' => 'eq',
+                'column' => 'status',
+                'value' => $status
+            ];
+            $sql_items[] = $status_sql;
+        }
+
+        list($sql, $placeholder) = self::buildQuery($sql_items);
         $todos = Todo::findByQuery($sql, $placeholder);
         return $todos;
     }
 
-    private static function buildQuery()
+    private static function buildQuery($sql_items)
     {
-        $status = $_GET['status'];
-        $title = $_GET['search-word'];
-
         $sql =  'SELECT * FROM todos WHERE user_id = :user_id ';
         $where = '';
         $placeholder = [];
-
-        if ($title !== null && $title !== '') {
-            $where .= ' and title LIKE :title';
-            $placeholder[":title"] = "%" . $title . "%";
-        }
-        if ($status !== null && $status !== '') {
-            $where  .= ' and status = :status;';
-            $placeholder[":status"] = $status;
-        }
-        if ($where !== null && $where !== '') {
+        if ($sql_items) {
+            foreach ($sql_items as $item) {
+                $column = $item['column'];
+                switch ($item['type']) {
+                    case 'eq':
+                        $type = "=";
+                        $value = $item['value'];
+                        break;
+                    case 'like':
+                        $type = "LIKE";
+                        $value = "%" . $item['value'] . "%";
+                        break;
+                }
+                $where .= ' and ' . $column . " " . $type . " :" . $column;
+                $placeholder[":" . $column] = $value;
+            }
             $sql .= $where;
         }
-
         return [$sql, $placeholder];
     }
 
