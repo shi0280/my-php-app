@@ -25,6 +25,14 @@ $todos = TodoController::index();
             <input type="text" id="search-word" name="search-word">
             <label for="search-word">検索ワード</label>
             <input type="submit" name="search-submit" value="検索">
+            <input type="radio" name="sort" value="created_at,asc">
+            <label for="sort">作成日昇順</label>
+            <input type="radio" name="sort" value="created_at,desc">
+            <label for="sort">作成日降順</label>
+            <input type="radio" name="sort" value="title,asc">
+            <label for="sort">タイトル昇順</label>
+            <input type="radio" name="sort" value="title,desc">
+            <label for="sort">タイトル降順</label>
         </form>
     </header>
     <?php

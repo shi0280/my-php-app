@@ -9,25 +9,36 @@ class TodoController
     {
         $status = $_GET['status'];
         $title = $_GET['search-word'];
+        $sort = $_GET['sort'];
 
         $sql_items = array();
 
         if ($title) {
-            $title_sql = [
+            $sql_item = [
                 'type' => 'like',
                 'column' => 'title',
                 'value' => $title
             ];
-            $sql_items[] = $title_sql;
+            $sql_items[] = $sql_item;
         }
 
-        if ($status !== null && $status !== '') {
-            $status_sql = [
+        if ($status !== null && $status !== '') { // if($status)にすると0の場合を受け取れない。
+            $sql_item = [
                 'type' => 'eq',
                 'column' => 'status',
                 'value' => $status
             ];
-            $sql_items[] = $status_sql;
+            $sql_items[] = $sql_item;
+        }
+
+        if ($sort) {
+            $sort_val = explode(",", $sort);
+            $sql_item = [
+                'type' => 'sort',
+                'column' => $sort_val[0],
+                'value' => $sort_val[1]
+            ];
+            $sql_items[] = $sql_item;
         }
 
         list($sql, $placeholder) = self::buildQuery($sql_items);
@@ -39,24 +50,33 @@ class TodoController
     {
         $sql =  'SELECT * FROM todos WHERE user_id = :user_id ';
         $where = '';
+        $order = '';
         $placeholder = [];
         if ($sql_items) {
             foreach ($sql_items as $item) {
-                $column = $item['column'];
                 switch ($item['type']) {
                     case 'eq':
+                        $column = $item['column'];
                         $type = "=";
                         $value = $item['value'];
+                        $where .= " and " . $column . " " . $type . " :" . $column;
+                        $placeholder[":" . $column] = $value;
                         break;
                     case 'like':
+                        $column = $item['column'];
                         $type = "LIKE";
                         $value = "%" . $item['value'] . "%";
+                        $where .= " and " . $column . " " . $type . " :" . $column;
+                        $placeholder[":" . $column] = $value;
                         break;
+                    case 'sort':
+                        $column = $item['column'];
+                        $type = "ORDER BY";
+                        $value = $item['value'];
+                        $order .= " " . $type . " "  . $column . " " . $value;
                 }
-                $where .= ' and ' . $column . " " . $type . " :" . $column;
-                $placeholder[":" . $column] = $value;
             }
-            $sql .= $where;
+            $sql .= $where . " " . $order;
         }
         return [$sql, $placeholder];
     }
