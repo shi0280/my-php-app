@@ -1,4 +1,7 @@
 <?php
+
+use function PHPSTORM_META\type;
+
 require(dirname(__FILE__) . '/../models/Todo.php');
 require(dirname(__FILE__) . '/validations/TodoValidation.php');
 
@@ -7,6 +10,14 @@ class TodoController
 {
     public static function index()
     {
+        $pagination_items = array();
+        if (isset($_GET['page']) && is_numeric($_GET['page'])) {
+            $page = $_GET['page'];
+        } else {
+            $page = 1;
+        }
+        $pagination_items['page'] = $page;
+
         $status = $_GET['status'];
         $title = $_GET['search-word'];
         $sort = $_GET['sort'];
@@ -40,15 +51,45 @@ class TodoController
             ];
             $sql_items[] = $sql_item;
         }
-
-        list($sql, $placeholder) = self::buildQuery($sql_items);
+        $type = 'select';
+        list($sql, $placeholder) = self::buildQuery($type, $sql_items, $pagination_items['page']);
         $todos = Todo::findByQuery($sql, $placeholder);
-        return $todos;
+
+        $type = 'count';
+        list($count_sql, $placeholder) = self::buildQuery($type, $sql_items, $pagination_items['page']);
+        $count = Todo::findByQuery($count_sql, $placeholder);
+        $max_page = ceil($count[0]['cnt'] / 5);
+        if ($page == 1 || $page == $max_page) {
+            $range = 4;
+        } elseif ($page == 2 || $page == $max_page - 1) {
+            $range = 3;
+        } else {
+            $range = 2;
+        }
+        $pagination_items['max_page'] = $max_page;
+        $pagination_items['range'] = $range;
+
+        $from_record = ($page - 1) * 5 + 1;
+        if ($page == $max_page && $count[0]['cnt'] % 5 !== 0) {
+            $to_record = ($page - 1) * 5 + $count[0]['cnt'] % 5;
+        } else {
+            $to_record = $page * 5;
+        }
+        $pagination_items['count'] = $count[0]['cnt'];
+        $pagination_items['from_record'] = $from_record;
+        $pagination_items['to_record'] = $to_record;
+
+        return [$todos, $pagination_items];
     }
 
-    private static function buildQuery($sql_items)
+    private static function buildQuery($type, $sql_items, $page = null)
     {
-        $sql =  'SELECT * FROM todos WHERE user_id = :user_id ';
+        $sql = '';
+        if ($type === 'select') {
+            $sql =  'SELECT * FROM todos WHERE user_id = :user_id ';
+        } else if ($type === 'count') {
+            $sql = 'SELECT COUNT(*) as cnt FROM todos WHERE user_id = :user_id';
+        }
         $where = '';
         $order = '';
         $placeholder = [];
@@ -78,6 +119,10 @@ class TodoController
             }
             $sql .= $where . " " . $order;
         }
+        if ($type === 'select') {
+            $limit = 'LIMIT ' . (($page - 1) * 5) . ',' . 5;
+        }
+        $sql .= " " . $limit;
         return [$sql, $placeholder];
     }
 

@@ -1,6 +1,15 @@
 <?php
 require(dirname(__FILE__) . '/../../controllers/TodoController.php');
-$todos = TodoController::index();
+list($todos, $pagenation_items) = TodoController::index();
+$page = $pagenation_items['page'];
+$max_page = $pagenation_items['max_page'];
+$range = $pagenation_items['range'];
+$from_record = $pagenation_items['from_record'];
+$to_record = $pagenation_items['to_record'];
+$count = $pagenation_items['count'];
+
+//var_dump($pagenation_items);
+
 ?>
 
 <!DOCTYPE html>
@@ -11,6 +20,7 @@ $todos = TodoController::index();
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Todos</title>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <link rel="stylesheet" href="../../css/styles.css">
 </head>
 
 <body>
@@ -52,6 +62,28 @@ $todos = TodoController::index();
         echo '<br></div>';
     }
     ?>
+    <p class="from_to"><?php echo $count; ?>件中 <?php echo $from_record; ?> - <?php echo $to_record; ?> 件目を表示</p>
+    <div class="pagination">
+        <?php if ($page >= 2) : ?>
+            <a href="index.php?page=<?php echo ($page - 1); ?>" class="page_feed">&laquo;</a>
+        <?php else :; ?>
+            <span class="first_last_page">&laquo;</span>
+        <?php endif; ?>
+        <?php for ($i = 1; $i <= $max_page; $i++) : ?>
+            <?php if ($i >= $page - $range && $i <= $page + $range) : ?>
+                <?php if ($i == $page) : ?>
+                    <span class="now_page_number"><?php echo $i; ?></span>
+                <?php else : ?>
+                    <a href="?page=<?php echo $i; ?>" class="page_number"><?php echo $i; ?></a>
+                <?php endif; ?>
+            <?php endif; ?>
+        <?php endfor; ?>
+        <?php if ($page < $max_page) : ?>
+            <a href="index.php?page=<?php echo ($page + 1); ?>" class="page_feed">&raquo;</a>
+        <?php else : ?>
+            <span class="first_last_page">&raquo;</span>
+        <?php endif; ?>
+    </div>
 </body>
 <script>
     $(document).on('click', 'input:checkbox[name="status"]', function() {
