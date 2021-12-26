@@ -40,12 +40,11 @@ $count = $pagenation_items['count'];
             <label for="sort">タイトル昇順</label>
             <input type="radio" name="sort" value="title,desc">
             <label for="sort">タイトル降順</label>
-            <input type="submit" name="btn_download" value="CSV出力">
         </form>
 
-        <!-- <form method="get" action="./download.php">
+        <form action="index.php" method="get">
             <input type="submit" name="btn_download" value="CSV出力">
-        </form> -->
+        </form>
 
     </header>
     <?php
@@ -146,34 +145,6 @@ $count = $pagenation_items['count'];
                 alert(e);
             });
 
-    });
-
-    $(document).on('click', '#btn_download', function() {
-
-
-        // updateStatus.phpファイルへのアクセス
-        $.ajax({
-                type: "POST",
-                url: "../api/deleteTodo.php",
-                data: {
-                    todo_id: $(this).data('todo_id'),
-                    status: $(this).val()
-                },
-                dataType: 'json'
-            })
-            // 成功
-            .done(function(data) {
-                console.log(data);
-                if (data['result'] === "sccess") {
-                    let div_id = "todo-item" + todo_id;
-                    $('#' + div_id).remove();
-                } else {
-                    alert(data['msg']);
-                }
-
-            }).fail(function(XMLHttpRequest, status, e) {
-                alert(e);
-            });
     });
 </script>
 

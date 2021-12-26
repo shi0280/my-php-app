@@ -53,6 +53,12 @@ class TodoController
         list($sql, $placeholder) = self::buildQuery($type, $sql_items, $pagination_items['page']);
         $todos = Todo::findByQuery($sql, $placeholder);
 
+        // ダウンロードの時以外はtodoリストを保存しておく
+        if (!isset($_GET['btn_download'])) {
+            list($sql, $placeholder) = self::buildQuery($type, $sql_items);
+            $_SESSION['todos'] = Todo::findByQuery($sql, $placeholder);
+        }
+
         $type = 'count';
         list($count_sql, $placeholder) = self::buildQuery($type, $sql_items);
         $count = Todo::findByQuery($count_sql, $placeholder);
@@ -71,10 +77,7 @@ class TodoController
 
         // ダウンロードボタンが押された場合
         if (isset($_GET['btn_download'])) {
-            $type = 'select';
-            list($sql, $placeholder) = self::buildQuery($type, $sql_items);
-            $todos = Todo::findByQuery($sql, $placeholder);
-            self::download_csv($todos);
+            self::download_csv($_SESSION['todos']);
         }
 
         return [$todos, $pagination_items];
