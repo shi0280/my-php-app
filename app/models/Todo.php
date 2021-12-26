@@ -7,6 +7,7 @@ class Todo extends BaseModel
     protected $detail;
     protected $deadline_at;
     protected $status;
+    const LIMIT = 5;
 
     public function setTitle($title)
     {

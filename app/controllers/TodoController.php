@@ -1,7 +1,5 @@
 <?php
 
-use function PHPSTORM_META\type;
-
 require(dirname(__FILE__) . '/../models/Todo.php');
 require(dirname(__FILE__) . '/validations/TodoValidation.php');
 
@@ -56,28 +54,28 @@ class TodoController
         $todos = Todo::findByQuery($sql, $placeholder);
 
         $type = 'count';
-        list($count_sql, $placeholder) = self::buildQuery($type, $sql_items, $pagination_items['page']);
+        list($count_sql, $placeholder) = self::buildQuery($type, $sql_items);
         $count = Todo::findByQuery($count_sql, $placeholder);
         $max_page = ceil($count[0]['cnt'] / 5);
-        if ($page == 1 || $page == $max_page) {
-            $range = 4;
-        } elseif ($page == 2 || $page == $max_page - 1) {
-            $range = 3;
-        } else {
-            $range = 2;
-        }
         $pagination_items['max_page'] = $max_page;
-        $pagination_items['range'] = $range;
 
-        $from_record = ($page - 1) * 5 + 1;
-        if ($page == $max_page && $count[0]['cnt'] % 5 !== 0) {
-            $to_record = ($page - 1) * 5 + $count[0]['cnt'] % 5;
+        $from_record = ($page - 1) * Todo::LIMIT + 1;
+        if ($page == $max_page && $count[0]['cnt'] % Todo::LIMIT !== 0) {
+            $to_record = ($page - 1) * Todo::LIMIT + $count[0]['cnt'] % Todo::LIMIT;
         } else {
-            $to_record = $page * 5;
+            $to_record = $page * Todo::LIMIT;
         }
         $pagination_items['count'] = $count[0]['cnt'];
         $pagination_items['from_record'] = $from_record;
         $pagination_items['to_record'] = $to_record;
+
+        // ダウンロードボタンが押された場合
+        if (isset($_GET['btn_download'])) {
+            $type = 'select';
+            list($sql, $placeholder) = self::buildQuery($type, $sql_items);
+            $todos = Todo::findByQuery($sql, $placeholder);
+            self::download_csv($todos);
+        }
 
         return [$todos, $pagination_items];
     }
@@ -85,6 +83,7 @@ class TodoController
     private static function buildQuery($type, $sql_items, $page = null)
     {
         $sql = '';
+        $limit = '';
         if ($type === 'select') {
             $sql =  'SELECT * FROM todos WHERE user_id = :user_id ';
         } else if ($type === 'count') {
@@ -119,8 +118,8 @@ class TodoController
             }
             $sql .= $where . " " . $order;
         }
-        if ($type === 'select') {
-            $limit = 'LIMIT ' . (($page - 1) * 5) . ',' . 5;
+        if ($page !== null) {
+            $limit = 'LIMIT ' . (($page - 1) * Todo::LIMIT) . ',' . Todo::LIMIT;
         }
         $sql .= " " . $limit;
         return [$sql, $placeholder];
@@ -255,5 +254,30 @@ class TodoController
             $result = "DBの保存に失敗しました。";
             return $result;
         }
+    }
+
+    private static function download_csv($todos)
+    {
+        header('Content-Disposition: attachment; filename="todolist.csv"');
+        $header = array("タイトル", "説明", "ステータス", "締切", "登録日");
+        echo mb_convert_encoding(implode(",", $header), 'SJIS-win', "UTF-8") . "\n";
+        foreach ($todos as $todo) {
+            foreach ($todo as $key => $value) {
+                if ($key === 'id' || $key === 'user_id' || $key === 'updated_at') {
+                    continue;
+                }
+                if ($key === 'status') {
+                    if ($value == 0) {
+                        echo mb_convert_encoding('未完了' . ",", 'SJIS-win', "UTF-8");
+                    } else {
+                        echo mb_convert_encoding('完了' . ",", 'SJIS-win', "UTF-8");
+                    }
+                    continue;
+                }
+                echo mb_convert_encoding($value . ",", 'SJIS-win', "UTF-8");
+            }
+            echo "\n";
+        }
+        exit;
     }
 }

@@ -3,12 +3,9 @@ require(dirname(__FILE__) . '/../../controllers/TodoController.php');
 list($todos, $pagenation_items) = TodoController::index();
 $page = $pagenation_items['page'];
 $max_page = $pagenation_items['max_page'];
-$range = $pagenation_items['range'];
 $from_record = $pagenation_items['from_record'];
 $to_record = $pagenation_items['to_record'];
 $count = $pagenation_items['count'];
-
-//var_dump($pagenation_items);
 
 ?>
 
@@ -43,7 +40,13 @@ $count = $pagenation_items['count'];
             <label for="sort">タイトル昇順</label>
             <input type="radio" name="sort" value="title,desc">
             <label for="sort">タイトル降順</label>
+            <input type="submit" name="btn_download" value="CSV出力">
         </form>
+
+        <!-- <form method="get" action="./download.php">
+            <input type="submit" name="btn_download" value="CSV出力">
+        </form> -->
+
     </header>
     <?php
     foreach ($todos as $todo) {
@@ -70,12 +73,10 @@ $count = $pagenation_items['count'];
             <span class="first_last_page">&laquo;</span>
         <?php endif; ?>
         <?php for ($i = 1; $i <= $max_page; $i++) : ?>
-            <?php if ($i >= $page - $range && $i <= $page + $range) : ?>
-                <?php if ($i == $page) : ?>
-                    <span class="now_page_number"><?php echo $i; ?></span>
-                <?php else : ?>
-                    <a href="?page=<?php echo $i; ?>" class="page_number"><?php echo $i; ?></a>
-                <?php endif; ?>
+            <?php if ($i == $page) : ?>
+                <span class="now_page_number"><?php echo $i; ?></span>
+            <?php else : ?>
+                <a href="?page=<?php echo $i; ?>" class="page_number"><?php echo $i; ?></a>
             <?php endif; ?>
         <?php endfor; ?>
         <?php if ($page < $max_page) : ?>
@@ -145,6 +146,34 @@ $count = $pagenation_items['count'];
                 alert(e);
             });
 
+    });
+
+    $(document).on('click', '#btn_download', function() {
+
+
+        // updateStatus.phpファイルへのアクセス
+        $.ajax({
+                type: "POST",
+                url: "../api/deleteTodo.php",
+                data: {
+                    todo_id: $(this).data('todo_id'),
+                    status: $(this).val()
+                },
+                dataType: 'json'
+            })
+            // 成功
+            .done(function(data) {
+                console.log(data);
+                if (data['result'] === "sccess") {
+                    let div_id = "todo-item" + todo_id;
+                    $('#' + div_id).remove();
+                } else {
+                    alert(data['msg']);
+                }
+
+            }).fail(function(XMLHttpRequest, status, e) {
+                alert(e);
+            });
     });
 </script>
 
