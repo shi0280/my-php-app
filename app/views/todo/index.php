@@ -42,9 +42,14 @@ $count = $pagenation_items['count'];
             <label for="sort">タイトル降順</label>
         </form>
 
-        <form action="index.php" method="get">
-            <input type="submit" name="btn_download" value="CSV出力">
-        </form>
+        <div style="display:flex; height:30px">
+            <input type="button" id="create-csv" value="CSV作成">
+            <div id="csv-output-area" style="display:none; align-items:center">
+                <p id="filename"></p>
+                <p id="csv_created"></p>
+                <input type="button" id="btn_download" value="CSV出力">
+            </div>
+        </div>
 
     </header>
     <?php
@@ -144,6 +149,50 @@ $count = $pagenation_items['count'];
             }).fail(function(XMLHttpRequest, status, e) {
                 alert(e);
             });
+
+    });
+
+    $(document).on('click', '#create-csv', function() {
+
+        // 処理が終わるまでボタンを非活性にする
+        $('#create-csv').prop("disabled", true);
+
+        let status = $('input[name=status]:checked').val();
+        let search_word = $.trim($('#search-word').val());
+        let sort = $('input[name=sort]:checked').val();
+
+        // createCsv.phpファイルへのアクセス
+        $.ajax({
+                type: "POST",
+                url: "../api/createCsv.php",
+                data: {
+                    status: status,
+                    search_word: search_word,
+                    sort: sort
+                },
+                dataType: 'json'
+            })
+            // 成功
+            .done(function(data) {
+                console.log(data);
+                if (data['result'] === "sccess") {
+                    $('#csv-output-area').css('display', 'flex');
+                    $('#filename').html(data['filename']);
+                    $('#csv_created').html(data['created_at']);
+                    $('#btn_download').attr("onclick", "location.href='../../var/tmp/todos.csv'")
+                } else {
+                    alert(data['msg']);
+                }
+
+            }).fail(function(XMLHttpRequest, status, e) {
+                alert(e);
+            }).always(() => {
+
+                // ボタンを活性に戻す
+                $('#create-csv').prop("disabled", false);
+            });
+
+
 
     });
 </script>
