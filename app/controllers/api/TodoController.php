@@ -101,79 +101,14 @@ class TodoController
         list($sql, $placeholder) = self::buildQuery($type, $sql_items);
         $todos = Todo::findByQuery($sql, $placeholder);
 
-        //try {
+        // csv出力
         $csv_file_name = "todos.csv";
         $csv_file_path = "../../var/tmp/" . $csv_file_name;
-        // ファイルが存在してたら削除
-        if (file_exists($csv_file_path)) {
-            unlink($csv_file_path);
-        }
-
-        $fp = fopen($csv_file_path, "a");
-        if (!$fp) {
-            $Result['result'] = false;
-            $Result['msg'] = 'ファイルの書き込みに失敗しました。';
-        }
-
-        // タイトル
-        $header = array("タイトル", "説明", "ステータス", "締切", "登録日");
-        mb_convert_variables('SJIS', 'UTF-8', $header);
-        fputcsv($fp, $header);
-
-        foreach ($todos as $todo) {
-            $line = '';
-            foreach ($todo as $key => $value) {
-                if ($key === 'id' || $key === 'user_id' || $key === 'updated_at') {
-                    continue;
-                }
-                if ($key === 'status') {
-                    if ($value == 0) {
-                        $line .= '未完了' . ",";
-                    } else {
-                        $line .= '完了' . ",";
-                    }
-                } else {
-                    $line .= $value . ",";
-                }
-            }
-            mb_convert_variables('SJIS', 'UTF-8', $line);
-            $line = rtrim($line, ',');
-            fwrite($fp, $line . "\n");
-        }
-
-        fclose($fp);
+        self::input_csvfile($csv_file_path, $todos);
 
         $Result['filename'] = $csv_file_name;
         $Result['created_at'] = date("Y/m/d H:i");
         $Result['result'] = 'sccess';
-        /*
-            $res = fopen($csv_file_path, 'w');
-            if ($res === FALSE) {
-                throw new Exception('ファイルの書き込みに失敗しました。');
-            }
-            // 項目名先に出力
-            $header = array("タイトル", "説明", "ステータス", "締切", "登録日");
-            mb_convert_variables('SJIS', 'UTF-8', $header);
-            fputcsv($res, $header);
-
-            // 出力
-            foreach ($todos as $todo) {
-
-                // 文字コード変換
-                mb_convert_variables('SJIS', 'UTF-8', $todo);
-                // ファイルに書き出し
-                fputcsv($res, $todo);
-            }
-            // ファイルを閉じる
-            fclose($res);
-            $Result['filename'] = $csv_file_name;
-            $Result['created_at'] = date("Y/m/d H:i");
-            $Result['result'] = 'sccess';
-        } catch (Exception $e) {
-            $Result['result'] = false;
-            $Result['msg'] = $e->getMessage();
-        }
-        */
 
         return $Result;
     }
@@ -221,5 +156,47 @@ class TodoController
         }
         $sql .= " " . $limit;
         return [$sql, $placeholder];
+    }
+
+    private static function input_csvfile($csv_file_path, $todos)
+    {
+
+        // ファイルが存在してたら削除
+        if (file_exists($csv_file_path)) {
+            unlink($csv_file_path);
+        }
+
+        $fp = fopen($csv_file_path, "a");
+        if (!$fp) {
+            $Result['result'] = false;
+            $Result['msg'] = 'ファイルの書き込みに失敗しました。';
+        }
+
+        // タイトル
+        $header = array("タイトル", "説明", "ステータス", "締切", "登録日");
+        mb_convert_variables('SJIS', 'UTF-8', $header);
+        fputcsv($fp, $header);
+
+        foreach ($todos as $todo) {
+            $line = '';
+            foreach ($todo as $key => $value) {
+                if ($key === 'id' || $key === 'user_id' || $key === 'updated_at') {
+                    continue;
+                }
+                if ($key === 'status') {
+                    if ($value == 0) {
+                        $line .= '未完了' . ",";
+                    } else {
+                        $line .= '完了' . ",";
+                    }
+                } else {
+                    $line .= $value . ",";
+                }
+            }
+            mb_convert_variables('SJIS', 'UTF-8', $line);
+            $line = rtrim($line, ',');
+            fwrite($fp, $line . "\n");
+        }
+        fclose($fp);
     }
 }

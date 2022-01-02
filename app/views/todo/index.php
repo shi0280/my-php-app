@@ -176,10 +176,11 @@ $count = $pagenation_items['count'];
             .done(function(data) {
                 console.log(data);
                 if (data['result'] === "sccess") {
+                    // ダウンロードエリア表示する
                     $('#csv-output-area').css('display', 'flex');
                     $('#filename').html(data['filename']);
                     $('#csv_created').html(data['created_at']);
-                    $('#btn_download').attr("onclick", "location.href='../../var/tmp/todos.csv'")
+                    $('#btn_download').attr("onclick", `location.href='../../var/tmp/${data['filename']}'`)
                 } else {
                     alert(data['msg']);
                 }
