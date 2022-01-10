@@ -121,37 +121,6 @@ $count = $pagenation_items['count'];
             });
     });
 
-    $(document).on('click', '.delete_todo', function() {
-
-        let todo_id = $(this).data('todo_id');
-        alert(todo_id);
-
-        // updateStatus.phpファイルへのアクセス
-        $.ajax({
-                type: "POST",
-                url: "../api/deleteTodo.php",
-                data: {
-                    todo_id: $(this).data('todo_id'),
-                    status: $(this).val()
-                },
-                dataType: 'json'
-            })
-            // 成功
-            .done(function(data) {
-                console.log(data);
-                if (data['result'] === "sccess") {
-                    let div_id = "todo-item" + todo_id;
-                    $('#' + div_id).remove();
-                } else {
-                    alert(data['msg']);
-                }
-
-            }).fail(function(XMLHttpRequest, status, e) {
-                alert(e);
-            });
-
-    });
-
     $(document).on('click', '#create-csv', function() {
 
         // 処理が終わるまでボタンを非活性にする
@@ -180,7 +149,6 @@ $count = $pagenation_items['count'];
                     $('#csv-output-area').css('display', 'flex');
                     $('#filename').html(data['filename']);
                     $('#csv_created').html(data['created_at']);
-                    $('#btn_download').attr("onclick", `location.href='../../var/tmp/${data['filename']}'`)
                 } else {
                     alert(data['msg']);
                 }
@@ -192,8 +160,25 @@ $count = $pagenation_items['count'];
                 // ボタンを活性に戻す
                 $('#create-csv').prop("disabled", false);
             });
+    });
 
 
+    $(document).on('click', '#btn_download', function() {
+
+        // createCSV.phpファイルへのアクセス
+        $.ajax({
+                url: "../api/export.php",
+            })
+            // 成功
+            .done(function(data) {
+                console.log(data);
+                if (data['result'] === "sccess") {} else {
+                    alert(data['msg']);
+                }
+
+            }).fail(function(XMLHttpRequest, status, e) {
+                alert(e);
+            });
 
     });
 </script>
