@@ -4,8 +4,7 @@ date_default_timezone_set('Asia/Tokyo');
 
 // ロックファイルパス
 const LOCK_FILE_NAME = "lock.txt";
-//const LOCK_FILE_PATH = "/var/tmp/" . LOCK_FILE_NAME;
-const LOCK_FILE_PATH = "/var/www/html/app/controllers/api/" . LOCK_FILE_NAME;
+const LOCK_FILE_PATH = "/var/tmp/" . LOCK_FILE_NAME;
 const HEADER = "status,filename,count,total,updated_at";
 const STATUS = array(
     1 => '開始',
@@ -16,7 +15,6 @@ const STATUS = array(
 // todoリストファイル
 const TODOLIST_FILE_NAME = "todolist.csv";
 const TODOLIST_FILE_PATH = "/var/tmp/" . TODOLIST_FILE_NAME;
-//$csv_file_path = "/var/www/html/app/controllers/api/" . $csv_file_name;
 
 $status =  $argv[1];
 $title = $argv[2];
@@ -184,30 +182,3 @@ function update_lock_file($todolist_status)
     fwrite($fp, $line);
     fclose($fp);
 }
-
-/*
-// ロックファイルを作成
-function create_lock_file($total)
-{
-    // ファイルが存在してたら削除
-    if (file_exists(LOCK_FILE_PATH)) {
-        unlink(LOCK_FILE_PATH);
-    }
-
-    $fp = fopen(LOCK_FILE_PATH, "w");
-    $header = "status,filename,count,total,updated_at" . PHP_EOL;
-    fwrite($fp, $header);
-    $line = "1," . date("Ymd") . "_" . TODOLIST_FILE_NAME . ",0," . $total . "," . date("Ymd H:i:s") . PHP_EOL;
-    fwrite($fp, $line);
-    fclose($fp);
-}
-
-// ロックファイルを更新
-function update_lock_file($status, $count, $total)
-{
-    $fp = fopen(LOCK_FILE_PATH, "a");
-    $line = $status . "," . date("Ymd") . "_" . TODOLIST_FILE_NAME . "," . $count . "," . $total . "," . date("Ymd H:i:s") . PHP_EOL;
-    fwrite($fp, $line);
-    fclose($fp);
-}
-*/
