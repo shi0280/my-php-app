@@ -1,5 +1,22 @@
 <?php
 require(dirname(__FILE__) . '/../models/Todo.php');
+date_default_timezone_set('Asia/Tokyo');
+
+// ロックファイルパス
+const LOCK_FILE_NAME = "lock.txt";
+//const LOCK_FILE_PATH = "/var/tmp/" . LOCK_FILE_NAME;
+const LOCK_FILE_PATH = "/var/www/html/app/controllers/api/" . LOCK_FILE_NAME;
+const HEADER = "status,filename,count,total,updated_at";
+const STATUS = array(
+    1 => '開始',
+    2 => '作成中',
+    3 => '完了'
+);
+
+// todoリストファイル
+const TODOLIST_FILE_NAME = "todolist.csv";
+const TODOLIST_FILE_PATH = "/var/tmp/" . TODOLIST_FILE_NAME;
+//$csv_file_path = "/var/www/html/app/controllers/api/" . $csv_file_name;
 
 $status =  $argv[1];
 $title = $argv[2];
@@ -39,10 +56,8 @@ $type = 'select';
 list($sql, $placeholder) = buildQuery($type, $sql_items);
 $todos = Todo::findByQuery($sql, $placeholder);
 
-// csv出力
-$csv_file_name = "todos.csv";
-$csv_file_path = "/var/tmp/" . $csv_file_name;
-input_csvfile($csv_file_path, $todos);
+
+input_csvfile($todos);
 
 function buildQuery($type, $sql_items, $page = null)
 {
@@ -89,25 +104,44 @@ function buildQuery($type, $sql_items, $page = null)
     return [$sql, $placeholder];
 }
 
-function input_csvfile($csv_file_path, $todos)
+function input_csvfile($todos)
 {
 
     // ファイルが存在してたら削除
-    if (file_exists($csv_file_path)) {
-        unlink($csv_file_path);
+    if (file_exists(TODOLIST_FILE_PATH)) {
+        unlink(TODOLIST_FILE_PATH);
     }
 
-    $fp = fopen($csv_file_path, "a");
+    // todoの数
+    $todos_count = Count($todos);
+
+    $fp = fopen(TODOLIST_FILE_PATH, "a");
     if (!$fp) {
         $Result['result'] = false;
         $Result['msg'] = 'ファイルの書き込みに失敗しました。';
+        return;
     }
 
+    // todoが0件だった場合
+    if (!$todos_count) {
+        $text = array("該当するtodoは0件です。");
+        mb_convert_variables('SJIS', 'UTF-8', $text);
+        fputcsv($fp, $text);
+        return;
+    }
+    // ロックファイル書き込み開始
+    $todolist_status = array('status' => '', 'count' => '', 'total' => $todos_count);
+    $todolist_status['status'] = 0;
+    $todolist_status['count'] = 0;
+    update_lock_file($todolist_status);
     // タイトル
     $header = array("タイトル", "説明", "ステータス", "締切", "登録日");
     mb_convert_variables('SJIS', 'UTF-8', $header);
     fputcsv($fp, $header);
 
+    // TODO 書き込み
+    $todolist_status['count'] = 0;
+    $todolist_status['status'] = 2; // 作成中
     foreach ($todos as $todo) {
         $line = '';
         foreach ($todo as $key => $value) {
@@ -127,6 +161,53 @@ function input_csvfile($csv_file_path, $todos)
         mb_convert_variables('SJIS', 'UTF-8', $line);
         $line = rtrim($line, ',');
         fwrite($fp, $line . "\n");
+        $todolist_status['count']++;
+        if ($todolist_status['count']  % 2 === 0) {
+            // ロックファイル更新
+            update_lock_file($todolist_status);
+        }
     }
     fclose($fp);
+    // ロックファイル更新
+    $todolist_status['status']  = 3; //完了
+    update_lock_file($todolist_status);
 }
+
+// ロックファイルを更新
+function update_lock_file($todolist_status)
+{
+    $fp = fopen(LOCK_FILE_PATH, "w");
+    $header = "status,filename,count,total,updated_at" . PHP_EOL;
+    fwrite($fp, $header);
+    $line = $todolist_status['status'] . "," . date("Ymd") . "_" . TODOLIST_FILE_NAME . ","
+        . $todolist_status['count'] . "," . $todolist_status['total'] . "," . date("Ymd H:i:s") . PHP_EOL;
+    fwrite($fp, $line);
+    fclose($fp);
+}
+
+/*
+// ロックファイルを作成
+function create_lock_file($total)
+{
+    // ファイルが存在してたら削除
+    if (file_exists(LOCK_FILE_PATH)) {
+        unlink(LOCK_FILE_PATH);
+    }
+
+    $fp = fopen(LOCK_FILE_PATH, "w");
+    $header = "status,filename,count,total,updated_at" . PHP_EOL;
+    fwrite($fp, $header);
+    $line = "1," . date("Ymd") . "_" . TODOLIST_FILE_NAME . ",0," . $total . "," . date("Ymd H:i:s") . PHP_EOL;
+    fwrite($fp, $line);
+    fclose($fp);
+}
+
+// ロックファイルを更新
+function update_lock_file($status, $count, $total)
+{
+    $fp = fopen(LOCK_FILE_PATH, "a");
+    $line = $status . "," . date("Ymd") . "_" . TODOLIST_FILE_NAME . "," . $count . "," . $total . "," . date("Ymd H:i:s") . PHP_EOL;
+    fwrite($fp, $line);
+    fclose($fp);
+}
+*/

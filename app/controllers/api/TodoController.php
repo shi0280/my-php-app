@@ -1,6 +1,10 @@
 <?php
 require(dirname(__FILE__) . '/../../models/Todo.php');
 date_default_timezone_set('Asia/Tokyo');
+
+// todoリストファイル
+const TODOLIST_FILE_NAME = "todolist.csv";
+const TODOLIST_FILE_PATH = "/var/tmp/" . TODOLIST_FILE_NAME;
 class TodoController
 {
     public static function update_status()
@@ -67,13 +71,14 @@ class TodoController
         $title = $_POST['search_word'];
         $sort = $_POST['sort'];
 
-        $file = dirname(__FILE__) . '/../../bin/create_csv.php';
-        $cmd = 'nohup php ' . $file . ' ' . $status . ' ' . $title . ' ' . $sort . ' > /dev/null 2>&1 &';
+        // $file = dirname(__FILE__) . '/../../bin/create_csv.php'; //うまくいかない
+        $file = "/var/www/html/app/bin/create_csv.php";
+        $cmd = 'php ' . $file . ' ' . $status . ' ' . $title . ' ' . $sort . ' > /dev/null 2>&1 &';
         exec($cmd);
 
         $Result['filename'] = 'download.php';
         $Result['created_at'] = date("Y/m/d H:i");
-        $Result['result'] = 'sccess';
+        $Result['result'] = "success";
 
         return $Result;
     }
@@ -82,26 +87,16 @@ class TodoController
 
     public static function export()
     {
-        $Result = array(
-            'result' => '',
-            'msg' => ''
-        );
-
-        $filepath = "../../var/tmp/todos.csv";
+        $filepath = "/var/tmp/" . TODOLIST_FILE_NAME;
         $filename = "download.csv";
         try {
-            header('Content-Type: application/octet-stream');
+            header("Content-Type: text/csv");
             header('Content-Disposition: attachment; filename=' . $filename);
             header('Content-Transfer-Encoding: binary');
 
             // ファイル出力
             readfile($filepath);
         } catch (Exception $e) {
-            $Result['result'] = 'false';
-            $Result['msg'] = $e->getMessage();
         }
-
-        $Result['result'] = 'sccess';
-        return $Result;
     }
 }

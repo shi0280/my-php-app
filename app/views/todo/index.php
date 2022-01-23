@@ -42,14 +42,15 @@ $count = $pagenation_items['count'];
             <label for="sort">タイトル降順</label>
         </form>
 
-        <div style="display:flex; height:30px">
+        <form method="post" action="../api/export.php" style="display:flex; height:30px">
             <input type="button" id="create-csv" value="CSV作成">
-            <div id="csv-output-area" style="display:none; align-items:center">
+
+            <div id="csv-output-area">
                 <p id="filename"></p>
                 <p id="csv_created"></p>
-                <input type="button" id="btn_download" value="CSV出力">
+                <input type="submit" name='export' value="CSV出力">
             </div>
-        </div>
+        </form>
 
     </header>
     <?php
@@ -144,7 +145,7 @@ $count = $pagenation_items['count'];
             // 成功
             .done(function(data) {
                 console.log(data);
-                if (data['result'] === "sccess") {
+                if (data['result'] === "success") {
                     // ダウンロードエリア表示する
                     $('#csv-output-area').css('display', 'flex');
                     $('#filename').html(data['filename']);
@@ -160,26 +161,6 @@ $count = $pagenation_items['count'];
                 // ボタンを活性に戻す
                 $('#create-csv').prop("disabled", false);
             });
-    });
-
-
-    $(document).on('click', '#btn_download', function() {
-
-        // createCSV.phpファイルへのアクセス
-        $.ajax({
-                url: "../api/export.php",
-            })
-            // 成功
-            .done(function(data) {
-                console.log(data);
-                if (data['result'] === "sccess") {} else {
-                    alert(data['msg']);
-                }
-
-            }).fail(function(XMLHttpRequest, status, e) {
-                alert(e);
-            });
-
     });
 </script>
 
