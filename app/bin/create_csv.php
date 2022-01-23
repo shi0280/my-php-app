@@ -160,7 +160,7 @@ function input_csvfile($todos)
         $line = rtrim($line, ',');
         fwrite($fp, $line . "\n");
         $todolist_status['count']++;
-        if ($todolist_status['count']  % 2 === 0) {
+        if ($todolist_status['count']  % 100 === 0) {
             // ロックファイル更新
             update_lock_file($todolist_status);
         }
