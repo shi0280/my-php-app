@@ -145,19 +145,32 @@ $count = $pagenation_items['count'];
             // 成功
             .done(function(data) {
                 console.log(data);
-                if (data['result'] === "success") {
-                    // ダウンロードエリア表示する
-                    $('#csv-output-area').css('display', 'flex');
-                    $('#filename').html(data['filename']);
-                    $('#csv_created').html(data['created_at']);
-                } else {
-                    alert(data['msg']);
-                }
-
+                // 5秒に1回lock.file
+                let timeId = setInterval(function() {
+                    $.ajax({
+                            url: "../api/checkLockFile.php"
+                        })
+                        // 成功
+                        .done(function(data) {
+                            console.log(data);
+                            let status = data['status'][0];
+                            if (data['result'] === "success") {
+                                // statusが3になったら終了
+                                if (status == 3) {
+                                    clearInterval(timeId);
+                                    // ダウンロードエリア表示する
+                                    $('#csv-output-area').css('display', 'flex');
+                                    $('#filename').html(data['filename']);
+                                    $('#csv_created').html(data['created_at']);
+                                }
+                            } else {
+                                alert(data['msg']);
+                            }
+                        });
+                }, 5000);
             }).fail(function(XMLHttpRequest, status, e) {
                 alert(e);
             }).always(() => {
-
                 // ボタンを活性に戻す
                 $('#create-csv').prop("disabled", false);
             });

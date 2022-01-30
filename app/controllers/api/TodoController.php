@@ -5,6 +5,10 @@ date_default_timezone_set('Asia/Tokyo');
 // todoリストファイル
 const TODOLIST_FILE_NAME = "todolist.csv";
 const TODOLIST_FILE_PATH = "/var/tmp/" . TODOLIST_FILE_NAME;
+
+// ロックファイルパス
+const LOCK_FILE_NAME = "lock.txt";
+const LOCK_FILE_PATH = "/var/tmp/" . LOCK_FILE_NAME;
 class TodoController
 {
     public static function update_status()
@@ -83,20 +87,40 @@ class TodoController
         return $Result;
     }
 
-
-
     public static function export()
     {
-        $filepath = "/var/tmp/" . TODOLIST_FILE_NAME;
         $filename = "download.csv";
-        try {
-            header("Content-Type: text/csv");
-            header('Content-Disposition: attachment; filename=' . $filename);
-            header('Content-Transfer-Encoding: binary');
+        if (file_exists(TODOLIST_FILE_PATH) && file_exists(LOCK_FILE_PATH)) {
+            try {
+                header("Content-Type: text/csv");
+                header('Content-Disposition: attachment; filename=' . $filename);
+                header('Content-Transfer-Encoding: binary');
 
-            // ファイル出力
-            readfile($filepath);
-        } catch (Exception $e) {
+                // ファイル出力
+                readfile(TODOLIST_FILE_PATH);
+            } catch (Exception $e) {
+            }
         }
+    }
+
+    public static function check_lock_file()
+    {
+        $Result = array(
+            'result' => '',
+            'msg' => ''
+        );
+
+        //ファイルチェック
+        if (file_exists(LOCK_FILE_PATH)) {
+
+            $fp = fopen(LOCK_FILE_PATH, 'r');
+            $status = explode(",", fgets($fp));
+            $Result['result'] = "success";
+            $Result['status'] = $status;
+        } else {
+            $Result['result'] = false;
+        }
+
+        return $Result;
     }
 }

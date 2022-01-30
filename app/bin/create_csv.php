@@ -7,9 +7,9 @@ const LOCK_FILE_NAME = "lock.txt";
 const LOCK_FILE_PATH = "/var/tmp/" . LOCK_FILE_NAME;
 const HEADER = "status,filename,count,total,updated_at";
 const STATUS = array(
-    1 => '開始',
-    2 => '作成中',
-    3 => '完了'
+    'start' => 1,
+    'processing' => 2,
+    'end' => 3
 );
 
 // todoリストファイル
@@ -128,15 +128,18 @@ function input_csvfile($todos)
         return;
     }
     // ロックファイル書き込み開始
-    $todolist_status = array('status' => '1', 'count' => 0, 'total' => $todos_count);
-    update_lock_file($todolist_status);
+    $status = STATUS['start']; // 開始
+    $count = 0;
+    $total = $todos_count;
+    update_lock_file($status, $count, $total);
     // タイトル
     $header = array("タイトル", "説明", "ステータス", "締切", "登録日");
     mb_convert_variables('SJIS', 'UTF-8', $header);
     fputcsv($fp, $header);
 
     // TODO 書き込み
-    $todolist_status['status'] = 2; // 作成中
+    sleep(20); // 確認用
+    $status = STATUS['processing']; // 作成中
     foreach ($todos as $todo) {
         $line = '';
         foreach ($todo as $key => $value) {
@@ -156,53 +159,26 @@ function input_csvfile($todos)
         mb_convert_variables('SJIS', 'UTF-8', $line);
         $line = rtrim($line, ',');
         fwrite($fp, $line . "\n");
-        $todolist_status['count']++;
-        if ($todolist_status['count']  % 100 === 0) {
+        $count++;
+        if ($count  % 100 === 0) {
             // ロックファイル更新
-            update_lock_file($todolist_status);
+            update_lock_file($status, $count, $total);
         }
     }
     fclose($fp);
     // ロックファイル更新
-    $todolist_status['status']  = 3; //完了
-    update_lock_file($todolist_status);
-}
-
-// ロックファイルを更新
-function update_lock_file($todolist_status)
-{
-    $fp = fopen(LOCK_FILE_PATH, "w");
-    $header = "status,filename,count,total,updated_at" . PHP_EOL;
-    fwrite($fp, $header);
-    $line = $todolist_status['status'] . "," . date("Ymd") . "_" . TODOLIST_FILE_NAME . ","
-        . $todolist_status['count'] . "," . $todolist_status['total'] . "," . date("Ymd H:i:s") . PHP_EOL;
-    fwrite($fp, $line);
-    fclose($fp);
-}
-
-/*
-// ロックファイルを作成
-function create_lock_file($total)
-{
-    // ファイルが存在してたら削除
-    if (file_exists(LOCK_FILE_PATH)) {
-        unlink(LOCK_FILE_PATH);
-    }
-
-    $fp = fopen(LOCK_FILE_PATH, "w");
-    $header = "status,filename,count,total,updated_at" . PHP_EOL;
-    fwrite($fp, $header);
-    $line = "1," . date("Ymd") . "_" . TODOLIST_FILE_NAME . ",0," . $total . "," . date("Ymd H:i:s") . PHP_EOL;
-    fwrite($fp, $line);
-    fclose($fp);
+    $status  = STATUS['end']; //完了
+    update_lock_file($status, $count, $total);
 }
 
 // ロックファイルを更新
 function update_lock_file($status, $count, $total)
 {
-    $fp = fopen(LOCK_FILE_PATH, "a");
-    $line = $status . "," . date("Ymd") . "_" . TODOLIST_FILE_NAME . "," . $count . "," . $total . "," . date("Ymd H:i:s") . PHP_EOL;
+    $fp = fopen(LOCK_FILE_PATH, "w");
+    //$header = "status,filename,count,total,updated_at" . PHP_EOL;
+    // fwrite($fp, $header);
+    $line = $status . "," . date("Ymd") . "_" . TODOLIST_FILE_NAME . ","
+        . $count . "," . $total . "," . date("Ymd H:i:s");
     fwrite($fp, $line);
     fclose($fp);
 }
-*/
