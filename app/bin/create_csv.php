@@ -5,6 +5,7 @@ date_default_timezone_set('Asia/Tokyo');
 // ロックファイルパス
 const LOCK_FILE_NAME = "lock.txt";
 const LOCK_FILE_PATH = "/var/tmp/" . LOCK_FILE_NAME;
+//const LOCK_FILE_PATH = "/var/www/html/app/controllers/api/" . LOCK_FILE_NAME;
 const HEADER = "status,filename,count,total,updated_at";
 const STATUS = array(
     'start' => 1,
@@ -15,6 +16,7 @@ const STATUS = array(
 // todoリストファイル
 const TODOLIST_FILE_NAME = "todolist.csv";
 const TODOLIST_FILE_PATH = "/var/tmp/" . TODOLIST_FILE_NAME;
+//$csv_file_path = "/var/www/html/app/controllers/api/" . $csv_file_name;
 
 $status =  $argv[1];
 $title = $argv[2];

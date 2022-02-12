@@ -4,6 +4,15 @@ require(dirname(__FILE__) . '/../models/Todo.php');
 require(dirname(__FILE__) . '/validations/TodoValidation.php');
 
 session_start();
+
+// ロックファイルパス
+const LOCK_FILE_NAME = "lock.txt";
+const LOCK_FILE_PATH = "/var/tmp/" . LOCK_FILE_NAME;
+const STATUS = array(
+    'start' => 1,
+    'processing' => 2,
+    'end' => 3
+);
 class TodoController
 {
     public static function index()
@@ -53,12 +62,6 @@ class TodoController
         list($sql, $placeholder) = self::buildQuery($type, $sql_items, $pagination_items['page']);
         $todos = Todo::findByQuery($sql, $placeholder);
 
-        // ダウンロードの時以外はtodoリストを保存しておく
-        // if (!isset($_GET['btn_download'])) {
-        //     list($sql, $placeholder) = self::buildQuery($type, $sql_items);
-        //     $_SESSION['todos'] = Todo::findByQuery($sql, $placeholder);
-        // }
-
         $type = 'count';
         list($count_sql, $placeholder) = self::buildQuery($type, $sql_items);
         $count = Todo::findByQuery($count_sql, $placeholder);
@@ -75,12 +78,9 @@ class TodoController
         $pagination_items['from_record'] = $from_record;
         $pagination_items['to_record'] = $to_record;
 
-        // ダウンロードボタンが押された場合
-        // if (isset($_GET['btn_download'])) {
-        //     self::download_csv($_SESSION['todos']);
-        // }
+        $isCreatingCsv = self::check_isCreatingCsv();
 
-        return [$todos, $pagination_items];
+        return [$todos, $pagination_items, $isCreatingCsv];
     }
 
     private static function buildQuery($type, $sql_items, $page = null)
@@ -126,6 +126,24 @@ class TodoController
         }
         $sql .= " " . $limit;
         return [$sql, $placeholder];
+    }
+
+    // csv作成中かどうか
+    private static function check_isCreatingCsv()
+    {
+        //ファイルチェック
+        if (file_exists(LOCK_FILE_PATH)) {
+            $fp = fopen(LOCK_FILE_PATH, 'r');
+            $status = explode(",", fgets($fp)); // 
+            if ($status[0] == STATUS["end"]) {
+                return false;
+            } else {
+                return true;     // lockファイルが存在する && statusがstartまたはprocessingの場合は作成中
+            }
+            $Result['status'] = STATUS["end"];
+        } else {
+            return false;
+        }
     }
 
     public static function detail()

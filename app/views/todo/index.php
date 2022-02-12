@@ -1,6 +1,6 @@
 <?php
 require(dirname(__FILE__) . '/../../controllers/TodoController.php');
-list($todos, $pagenation_items) = TodoController::index();
+list($todos, $pagenation_items, $isCreatingCsv) = TodoController::index();
 $page = $pagenation_items['page'];
 $max_page = $pagenation_items['max_page'];
 $from_record = $pagenation_items['from_record'];
@@ -43,12 +43,11 @@ $count = $pagenation_items['count'];
         </form>
 
         <form method="post" action="../api/export.php" style="display:flex; height:30px">
-            <input type="button" id="create-csv" value="CSV作成">
-
+            <input type="button" <?php if ($isCreatingCsv) echo "disabled"; ?> id="create-csv" value="CSV作成">
             <div id="csv-output-area">
                 <p id="filename"></p>
                 <p id="csv_created"></p>
-                <input type="submit" name='export' value="CSV出力">
+                <input type="submit" <?php if ($isCreatingCsv) echo "disabled"; ?> name='export' value="CSV出力">
             </div>
         </form>
 
