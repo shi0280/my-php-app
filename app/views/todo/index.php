@@ -22,6 +22,9 @@ $count = $pagenation_items['count'];
 
 <body>
     <header>
+        <form method="post" action="../auth/logout.php">
+            <button>ログアウト</button>
+        </form>
         <p style="border-bottom: 1px solid #ccc; font-weight:bold;">ToDo</p>
         <button onclick="location.href='new.php'" style="display:block;">新規登録<br></button>
         <form action="index.php" method="get">

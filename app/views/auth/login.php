@@ -32,6 +32,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         <br />
         <?php if ($error) echo "<p>" . $error . "</p>"; ?>
     </form>
+    <a href='../user/new.php'>ユーザー新規登録</a>
 </body>
 
 </html>

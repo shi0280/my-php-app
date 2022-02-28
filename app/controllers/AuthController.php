@@ -14,7 +14,7 @@ class AuthController
 
         if ($user) {
             //パスワードマッチしているかチェック
-            if ($password === $user['password']) {
+            if (password_verify($password, $user['password'])) {
                 //DBのユーザー情報をセッションに保存
                 $_SESSION['id'] = $user['id'];
                 $_SESSION['name'] = $user['name'];
@@ -24,5 +24,11 @@ class AuthController
         }
         $error = "メールアドレスまたはパスワードが違います。";
         return $error;
+    }
+
+    public static function logout()
+    {
+        $_SESSION = array();
+        session_destroy();
     }
 }
