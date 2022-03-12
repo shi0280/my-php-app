@@ -1,5 +1,8 @@
 FROM php:7.2-fpm
 
+# 設定ファイルをコンテナにコピー
+COPY ./php.ini /usr/local/etc/php/
+
 # install composer
 RUN cd /usr/bin && curl -s http://getcomposer.org/installer | php && ln -s /usr/bin/composer.phar /usr/bin/composer
 RUN apt-get update \
@@ -14,3 +17,5 @@ RUN apt-get update \
     && docker-php-ext-install pdo_mysql pdo_pgsql mysqli 
 RUN echo "alias ll='ls -la'" >> ~/.bashrc && . ~/.bashrc
 WORKDIR /var/www/html
+
+

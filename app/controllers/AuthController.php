@@ -10,7 +10,7 @@ class AuthController
         $email = $_POST['email'];
         $password = $_POST['password'];
 
-        $user = User::login($email);
+        $user = User::getUserByEmail($email);
 
         if ($user) {
             //パスワードマッチしているかチェック

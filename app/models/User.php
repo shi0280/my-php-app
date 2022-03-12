@@ -67,7 +67,7 @@ class User extends BaseModel
         return $res; // 成功true 
     }
 
-    public static function login($email)
+    public static function getUserByEmail($email)
     {
         try {
             $pdo = parent::connect_db();

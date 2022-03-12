@@ -1,4 +1,4 @@
-version: '3'
+version: "3"
 services:
   web:
     image: nginx:1.15.6
@@ -12,7 +12,7 @@ services:
   app:
     build: ./docker/php
     volumes:
-     - .:/var/www/html
+      - .:/var/www/html
     depends_on:
       - mysql
   mysql:
@@ -29,6 +29,12 @@ services:
     volumes:
       - mysql-data:/var/lib/mysql
       - ./mysql/my.cnf:/etc/mysql/conf.d/my.cnf
+  mailhog:
+    image: mailhog/mailhog
+    ports:
+      - "8025:8025"
+    volumes:
+      - "./bin/mhsendmail:/usr/local/bin/mhsendmail"
 
 volumes:
   mysql-data:
