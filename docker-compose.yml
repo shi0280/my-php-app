@@ -13,6 +13,7 @@ services:
     build: ./docker/php
     volumes:
       - .:/var/www/html
+      - ./php/php.ini:/usr/local/etc/php/php.ini
     depends_on:
       - mysql
   mysql:
@@ -33,8 +34,5 @@ services:
     image: mailhog/mailhog
     ports:
       - "8025:8025"
-    volumes:
-      - "./bin/mhsendmail:/usr/local/bin/mhsendmail"
-
 volumes:
   mysql-data:
