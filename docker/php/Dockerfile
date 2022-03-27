@@ -13,10 +13,9 @@ RUN apt-get update \
     && apt-get install -y libpq-dev \
     && docker-php-ext-install pdo_mysql pdo_pgsql mysqli 
 RUN echo "alias ll='ls -la'" >> ~/.bashrc && . ~/.bashrc
-WORKDIR /var/www/html
+# WORKDIR /var/www/html
 RUN curl -sSL https://github.com/mailhog/mhsendmail/releases/download/v0.2.0/mhsendmail_linux_amd64 -o mhsendmail \
     && chmod +x mhsendmail \
     && mv mhsendmail /usr/local/bin/mhsendmail
-
 
 
