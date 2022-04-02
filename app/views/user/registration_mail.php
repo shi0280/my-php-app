@@ -2,12 +2,10 @@
 require(dirname(__FILE__) . '/../../controllers/UserController.php');
 session_start();
 
-$token = $_GET['token'];
-
 if ($_SERVER['REQUEST_METHOD'] == 'GET') {
-    list($input, $errors) = UserController::new();
+    list($input, $errors) = UserController::new_pre_user();
 } else if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    $result = UserController::store($token);
+    $result = UserController::store_pre_user();
 }
 
 ?>
@@ -28,20 +26,15 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
 
 <body>
     <header>
-        <p style="border-bottom: 1px solid #ccc; font-weight:bold;">ユーザー新規登録</p>
+        <p style="border-bottom: 1px solid #ccc; font-weight:bold;">メール登録</p>
         <a href="../auth/login.php">ログイン画面へ</a>
     </header>
-    <form action="new.php" method="post">
+    <form action="registration_mail.php" method="post">
         <ul>
-            <li></li><label for="name">名前:</label></li>
-            <li><input type="text" name="name" value="<?php if (isset($input['name'])) {
-                                                            echo $input['name'];
+            <li></li><label for="email">メールアドレス:</label></li>
+            <li><input type="text" name="email" value="<?php if (isset($input['email'])) {
+                                                            echo $input['email'];
                                                         } ?>"></li>
-
-            <li></li><label for="password">パスワード:</label></li>
-            <li><input type="password" name="pass" value="<?php if (isset($input['pass'])) {
-                                                                echo $input['pass'];
-                                                            } ?>"></li>
             <li><input type="submit" name="store" value="登録"></li>
         </ul>
         <?php if (isset($errors)) : ?>

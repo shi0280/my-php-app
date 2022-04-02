@@ -4,20 +4,32 @@ class UserValidation extends BaseValidation
 {
     protected $data;
 
+    public function check_pre_user($email)
+    {
+        if (!$email) {
+            $this->errors[] = "メールアドレスを入力してください。";
+        } else if (mb_strlen($email) > 100) {
+            $this->errors[] = "メールアドレスを100文字以内で入力してください。";
+        } else if (!filter_var($email,  FILTER_VALIDATE_EMAIL)) {
+            $this->errors[] = "メールアドレスの形式が正しくありません。";
+        }
+
+        if (count($this->errors) > 0) {
+            return false;
+        }
+
+        // バリデーションOKなら入力された値を保存
+        $this->data['email'] = $email;
+
+        return true;
+    }
+
     public function check($checkData)
     {
         if (!$checkData['name']) {
             $this->errors[] = "名前を入力してください。";
         } else if (mb_strlen($checkData['name']) > 50) {
             $this->errors[] = "名前を50文字以内で入力してください。";
-        }
-
-        if (!$checkData['email']) {
-            $this->errors[] = "メールアドレスを入力してください。";
-        } else if (mb_strlen($checkData['email']) > 100) {
-            $this->errors[] = "メールアドレスを100文字以内で入力してください。";
-        } else if (!filter_var($checkData['email'],  FILTER_VALIDATE_EMAIL)) {
-            $this->errors[] = "メールアドレスの形式が正しくありません。";
         }
 
         if (!$checkData['pass']) {
@@ -34,7 +46,6 @@ class UserValidation extends BaseValidation
 
         // バリデーションOKなら入力された値を保存
         $this->data['name'] = $checkData['name'];
-        $this->data['email'] = $checkData['email'];
         $this->data['pass'] = $checkData['pass'];
 
         return true;
