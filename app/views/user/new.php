@@ -2,10 +2,17 @@
 require(dirname(__FILE__) . '/../../controllers/UserController.php');
 session_start();
 
-$token = $_GET['token'];
+// トークンを保存
+$token = '';
+if (isset($_GET['token'])) {
+    $token = $_GET['token'];
+    $_SESSION['token'] = $token;
+} else if (isset($_SESSION['token'])) {
+    $token = $_SESSION['token'];
+}
 
 if ($_SERVER['REQUEST_METHOD'] == 'GET') {
-    list($input, $errors) = UserController::new();
+    list($input, $errors) = UserController::new($token);
 } else if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $result = UserController::store($token);
 }
@@ -19,11 +26,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Todos</title>
-    <style>
-        li {
-            list-style: none;
-        }
-    </style>
+    <link rel="stylesheet" href="../../css/styles.css">
 </head>
 
 <body>
@@ -33,15 +36,19 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
     </header>
     <form action="new.php" method="post">
         <ul>
-            <li></li><label for="name">名前:</label></li>
+            <li><label for="name">名前:</label></li>
             <li><input type="text" name="name" value="<?php if (isset($input['name'])) {
                                                             echo $input['name'];
                                                         } ?>"></li>
 
-            <li></li><label for="password">パスワード:</label></li>
+            <li><label for="password">パスワード:</label></li>
             <li><input type="password" name="pass" value="<?php if (isset($input['pass'])) {
                                                                 echo $input['pass'];
                                                             } ?>"></li>
+            <li><label for="pass-confirm">パスワード確認:</label></li>
+            <li><input type="password" name="pass-confirm" value="<?php if (isset($input['pass-confirm'])) {
+                                                                        echo $input['pass-confirm'];
+                                                                    } ?>"></li>
             <li><input type="submit" name="store" value="登録"></li>
         </ul>
         <?php if (isset($errors)) : ?>

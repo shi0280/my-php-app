@@ -51,3 +51,7 @@ a.page_number:visited {
   color: black;
   font-weight: bold;
 }
+
+ul {
+  list-style-type: none;
+}

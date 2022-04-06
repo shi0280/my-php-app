@@ -38,6 +38,8 @@ class UserValidation extends BaseValidation
             $this->errors[] = "パスワードを100文字以内で入力してください。";
         } else if (!preg_match('/^[a-z0-9]{6,}$/i', $checkData['pass'])) {
             $this->errors[] = "パスワードは英数字6文字以上です。";
+        } else if ($checkData['pass'] !== $checkData['pass-confirm']) {
+            $this->errors[] = "パスワードが一致しません。";
         }
 
         if (count($this->errors) > 0) {

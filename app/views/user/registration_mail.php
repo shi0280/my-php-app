@@ -1,6 +1,5 @@
 <?php
 require(dirname(__FILE__) . '/../../controllers/UserController.php');
-session_start();
 
 if ($_SERVER['REQUEST_METHOD'] == 'GET') {
     list($input, $errors) = UserController::new_pre_user();
@@ -17,11 +16,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Todos</title>
-    <style>
-        li {
-            list-style: none;
-        }
-    </style>
+    <link rel="stylesheet" href="../../css/styles.css">
 </head>
 
 <body>
@@ -31,7 +26,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
     </header>
     <form action="registration_mail.php" method="post">
         <ul>
-            <li></li><label for="email">メールアドレス:</label></li>
+            <li><label for="email">メールアドレス:</label></li>
             <li><input type="text" name="email" value="<?php if (isset($input['email'])) {
                                                             echo $input['email'];
                                                         } ?>"></li>

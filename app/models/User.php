@@ -87,8 +87,6 @@ class User extends BaseModel
 
     public static function store($name, $pass, $token)
     {
-        echo $token;
-        echo "aa";
         $hash_pass = password_hash($pass, PASSWORD_DEFAULT);
         $status = 1;
 
@@ -134,6 +132,27 @@ class User extends BaseModel
             $stmt = $pdo->prepare($sql);
             $stmt->bindValue(':email', $email);
             $status = 1; // 本登録のみ
+            $stmt->bindValue(':status', $status);
+            $stmt->execute();
+            $user = $stmt->fetch(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            throw new PDOException("DBエラーです");
+            return false;
+        } finally {
+            // データベースの接続解除
+            $pdo = null;
+        }
+        return $user;
+    }
+
+    public static function getUserByToken($token)
+    {
+        try {
+            $pdo = parent::connect_db();
+            $sql = "SELECT * FROM users WHERE token = :token AND status = :status";
+            $stmt = $pdo->prepare($sql);
+            $stmt->bindValue(':token', $token);
+            $status = 0; // 仮登録のみ
             $stmt->bindValue(':status', $status);
             $stmt->execute();
             $user = $stmt->fetch(PDO::FETCH_ASSOC);
