@@ -2,9 +2,13 @@
 require(dirname(__FILE__) . '/../../controllers/AuthController.php');
 session_start();
 
-if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+
+if ($_SERVER['REQUEST_METHOD'] == 'GET') {
+    $error = AuthController::login_form();
+} else if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $error = AuthController::login();
 }
+
 ?>
 
 <!DOCTYPE html>

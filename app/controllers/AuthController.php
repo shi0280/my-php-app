@@ -5,6 +5,17 @@ session_start();
 
 class AuthController
 {
+    public static function login_form()
+    {
+        // エラーがあったら取得する
+        $error = '';
+        if (isset($_SESSION['errors'])) {
+            $error = $_SESSION['errors'];
+        }
+        $_SESSION['errors'] = [];
+        return $error;
+    }
+
     public static function login()
     {
         $email = $_POST['email'];
@@ -13,8 +24,12 @@ class AuthController
         $user = User::getUserByEmail($email);
 
         if ($user) {
+            if ($user['status'] == 0) {
+                $error = "本登録してください。";
+                return $error;
+            }
             //パスワードマッチしているかチェック
-            if (password_verify($password, $user['password'])) {
+            else if (password_verify($password, $user['password'])) {
                 //DBのユーザー情報をセッションに保存
                 $_SESSION['id'] = $user['id'];
                 $_SESSION['name'] = $user['name'];

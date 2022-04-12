@@ -2,19 +2,10 @@
 require(dirname(__FILE__) . '/../../controllers/UserController.php');
 session_start();
 
-// トークンを保存
-$token = '';
-if (isset($_GET['token'])) {
-    $token = $_GET['token'];
-    $_SESSION['token'] = $token;
-} else if (isset($_SESSION['token'])) {
-    $token = $_SESSION['token'];
-}
-
 if ($_SERVER['REQUEST_METHOD'] == 'GET') {
-    list($input, $errors) = UserController::new($token);
+    list($input, $errors, $token) = UserController::new();
 } else if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    $result = UserController::store($token);
+    $result = UserController::store();
 }
 
 ?>
@@ -49,6 +40,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
             <li><input type="password" name="pass-confirm" value="<?php if (isset($input['pass-confirm'])) {
                                                                         echo $input['pass-confirm'];
                                                                     } ?>"></li>
+            <li><input type="hidden" name="token" value="<?php echo $token ?>"></li>
             <li><input type="submit" name="store" value="登録"></li>
         </ul>
         <?php if (isset($errors)) : ?>

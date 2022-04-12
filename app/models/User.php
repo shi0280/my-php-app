@@ -1,6 +1,12 @@
 <?php
 require(dirname(__FILE__) . '/BaseModel.php');
 
+const PREUSER_NAME = "pre_user";
+const PREUSER_PASS = "pre_pass";
+const STATUS = array(
+    'PREUSER' => 0,
+    'USER' => 1
+);
 class User extends BaseModel
 {
     protected $name;
@@ -34,35 +40,47 @@ class User extends BaseModel
 
     public static function store_pre_user($email, $token)
     {
-        // 仮登録
-        $name = 'pre_user';
-        $pass = 'pre_pass';
-        $status = 0;
+        // 新規登録かどうか
+        $is_new_user = false;
 
         try {
             $pdo = parent::connect_db();
+            // トランザクション開始
+            $pdo->beginTransaction();
 
-            $sql = 'SELECT COUNT(*) FROM users WHERE email = :email';
+            $sql = 'SELECT * FROM users WHERE email = :email';
             $stmt = $pdo->prepare($sql);
             $stmt->bindValue(':email', $email, PDO::PARAM_STR);
             $stmt->execute();
-            $count = $stmt->fetchColumn();
-            if ($count > 0) {
+            $user = $stmt->fetch(PDO::FETCH_ASSOC);
+            if (!$user) {
+                $is_new_user = true;
+            } else if ($user['status'] === STATUS['USER']) {
                 return "メールアドレスは登録済みです";
+            } else if ($user['status'] === STATUS['PREUSER']) {
+                $is_new_user = false;
             }
-
-            $sql = 'INSERT INTO users (name, email, password, created_at, updated_at, status, token, token_created_at) 
-                    VALUES (:name, :email, :password, now(), now(), :status, :token, now())';
-            $stmt = $pdo->prepare($sql);
-
-            $stmt->bindValue(':name', $name, PDO::PARAM_STR);
-            $stmt->bindValue(':email', $email, PDO::PARAM_STR);
-            $stmt->bindValue(':password', $pass, PDO::PARAM_STR);
-            $stmt->bindValue(':status', $status, PDO::PARAM_STR);
-            $stmt->bindValue(':token', $token, PDO::PARAM_STR);
+            // 仮登録未済だったら登録、仮登録済みだったら更新
+            if ($is_new_user) {
+                $sql = 'INSERT INTO users (name, email, password, created_at, updated_at, status, token, token_created_at) 
+                        VALUES (:name, :email, :password, now(), now(), :status, :token, now())';
+                $stmt = $pdo->prepare($sql);
+                $stmt->bindValue(':name', PREUSER_NAME, PDO::PARAM_STR);
+                $stmt->bindValue(':email', $email, PDO::PARAM_STR);
+                $stmt->bindValue(':password', PREUSER_PASS, PDO::PARAM_STR);
+                $stmt->bindValue(':status', STATUS['PREUSER'], PDO::PARAM_STR);
+                $stmt->bindValue(':token', $token, PDO::PARAM_STR);
+            } else {
+                $sql = 'UPDATE users SET token=:token, updated_at=now(), token_created_at=now() WHERE id=:id';
+                $stmt = $pdo->prepare($sql);
+                $stmt->bindValue(':token', $token, PDO::PARAM_STR);
+                $stmt->bindValue(':id', $user['id'], PDO::PARAM_STR);
+            }
             $res = $stmt->execute();
 
-            if (!$res) {
+            if ($res) {
+                $pdo->commit();
+            } else {
                 throw new Exception("DBに登録できませんでした");
             }
         } catch (PDOException $e) {
@@ -88,7 +106,7 @@ class User extends BaseModel
     public static function store($name, $pass, $token)
     {
         $hash_pass = password_hash($pass, PASSWORD_DEFAULT);
-        $status = 1;
+        $status = STATUS['USER'];
 
         try {
             $pdo = parent::connect_db();
@@ -128,11 +146,9 @@ class User extends BaseModel
     {
         try {
             $pdo = parent::connect_db();
-            $sql = "SELECT * FROM users WHERE email = :email AND status = :status";
+            $sql = "SELECT * FROM users WHERE email = :email";
             $stmt = $pdo->prepare($sql);
             $stmt->bindValue(':email', $email);
-            $status = 1; // 本登録のみ
-            $stmt->bindValue(':status', $status);
             $stmt->execute();
             $user = $stmt->fetch(PDO::FETCH_ASSOC);
         } catch (PDOException $e) {
@@ -152,7 +168,7 @@ class User extends BaseModel
             $sql = "SELECT * FROM users WHERE token = :token AND status = :status";
             $stmt = $pdo->prepare($sql);
             $stmt->bindValue(':token', $token);
-            $status = 0; // 仮登録のみ
+            $status = STATUS['PREUSER']; // 仮登録のみ
             $stmt->bindValue(':status', $status);
             $stmt->execute();
             $user = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -163,6 +179,7 @@ class User extends BaseModel
             // データベースの接続解除
             $pdo = null;
         }
+
         return $user;
     }
 }

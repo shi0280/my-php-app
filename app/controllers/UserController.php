@@ -6,13 +6,29 @@ require(dirname(__FILE__) . '/../service/mailService.php');
 session_start();
 class UserController
 {
-    public static function new($token)
+    public static function new()
     {
+        // トークンを取得
+        $token = '';
+        if (isset($_GET['token'])) {
+            $token = $_GET['token'];
+        }
+
         // トークンがない場合ログイン画面へ
         $user = User::getUserByToken($token);
         if (!$token || !$user) {
             header("location: /../views/auth/login.php");
         }
+
+        // トークン発行から1時間以上経過したらメール登録ページへ
+        $now =  new DateTime('now');
+        $token_created_at = new DateTime($user['token_created_at']);
+        $token_duration = $now->diff($token_created_at);
+        $token_duration_hour =  $token_duration->days * 24 + $token_duration->h;
+        if ($token_duration_hour >= 1) {
+            header("location: /../views/user/registration_mail.php");
+        };
+
         // GETパラメータがあったら取得する
         $input['name'] = $_GET['name'];
         $input['pass'] = $_GET['pass'];
@@ -23,11 +39,14 @@ class UserController
             $errors = $_SESSION['errors'];
         }
         $_SESSION['errors'] = [];
-        return [$input, $errors];
+        return [$input, $errors, $token];
     }
 
-    public static function store($token)
+    public static function store()
     {
+        // トークンを取得
+        $token = $_POST['token'];
+        $token;
         // データを配列に格納
         $checkData = array();
         $checkData['name'] = $_POST['name'];
