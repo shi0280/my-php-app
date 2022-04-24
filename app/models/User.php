@@ -62,14 +62,15 @@ class User extends BaseModel
             }
             // 仮登録未済だったら登録、仮登録済みだったら更新
             if ($is_new_user) {
-                $sql = 'INSERT INTO users (name, email, password, created_at, updated_at, status, token, token_created_at) 
-                        VALUES (:name, :email, :password, now(), now(), :status, :token, now())';
+                $sql = 'INSERT INTO users (name, email, password, created_at, updated_at, status, token, token_created_at, failed_count) 
+                        VALUES (:name, :email, :password, now(), now(), :status, :token, now(), :failed_count)';
                 $stmt = $pdo->prepare($sql);
                 $stmt->bindValue(':name', PREUSER_NAME, PDO::PARAM_STR);
                 $stmt->bindValue(':email', $email, PDO::PARAM_STR);
                 $stmt->bindValue(':password', PREUSER_PASS, PDO::PARAM_STR);
                 $stmt->bindValue(':status', STATUS['PREUSER'], PDO::PARAM_STR);
                 $stmt->bindValue(':token', $token, PDO::PARAM_STR);
+                $stmt->bindValue(':failed_count', 0, PDO::PARAM_INT);
             } else {
                 $sql = 'UPDATE users SET token=:token, updated_at=now(), token_created_at=now() WHERE id=:id';
                 $stmt = $pdo->prepare($sql);
@@ -181,5 +182,117 @@ class User extends BaseModel
         }
 
         return $user;
+    }
+    // ログイン失敗回数のカウントアップ
+    public static function login_failed_count_up($email)
+    {
+        try {
+            $pdo = parent::connect_db();
+            // トランザクション開始
+            $pdo->beginTransaction();
+            $sql = "UPDATE users SET failed_count = failed_count + 1 WHERE email = :email";
+            $stmt = $pdo->prepare($sql);
+            $stmt->bindValue(':email', $email, PDO::PARAM_STR);
+            $res = $stmt->execute();
+
+            if ($res) {
+                // コミット
+                $pdo->commit();
+            } else {
+                throw new Exception("更新に失敗しました。");
+            }
+        } catch (PDOException $e) {
+            $pdo->rollBack();
+            return $e->getMessage();
+        } catch (Exception $e) {
+            $pdo->rollBack();
+            return $e->getMessage();
+        } finally {
+            // データベースの接続解除
+            $pdo = null;
+        }
+    }
+    // アカウントロック
+    public static function lock_login_account($email)
+    {
+        try {
+            $pdo = parent::connect_db();
+            // トランザクション開始
+            $pdo->beginTransaction();
+            $sql = "UPDATE users SET `is_locked` = :is_locked, locked_time = now() WHERE email = :email";
+            $stmt = $pdo->prepare($sql);
+            $stmt->bindValue(':is_locked', true, PDO::PARAM_BOOL);
+            $stmt->bindValue(':email', $email, PDO::PARAM_STR);
+            $res = $stmt->execute();
+
+            if ($res) {
+                // コミット
+                $pdo->commit();
+            } else {
+                throw new Exception("更新に失敗しました。");
+            }
+        } catch (PDOException $e) {
+            $pdo->rollBack();
+            return $e->getMessage();
+        } catch (Exception $e) {
+            $pdo->rollBack();
+            return $e->getMessage();
+        } finally {
+            // データベースの接続解除
+            $pdo = null;
+        }
+    }
+    // ログイン失敗回数
+    public static function get_login_failed_count($email)
+    {
+        try {
+            $pdo = parent::connect_db();
+            $sql = "SELECT failed_count FROM users WHERE email = :email";
+            $stmt = $pdo->prepare($sql);
+            $stmt->bindValue(':email', $email);
+            $stmt->execute();
+            $row = $stmt->fetch(PDO::FETCH_ASSOC);
+            if (!empty($row)) {
+                return $row['failed_count'];
+            }
+            return 0;
+        } catch (PDOException $e) {
+            throw new PDOException("DBエラーです");
+            return false;
+        } finally {
+            // データベースの接続解除
+            $pdo = null;
+        }
+    }
+    // アカウントロック解除
+    public static function unlock_login_account($email)
+    {
+        try {
+            $pdo = parent::connect_db();
+            // トランザクション開始
+            $pdo->beginTransaction();
+            $sql = "UPDATE users SET failed_count = :failed_count, `is_locked` = :is_locked, locked_time = :locked_time WHERE email = :email;";
+            $stmt = $pdo->prepare($sql);
+            $stmt->bindValue(':failed_count', 0, PDO::PARAM_STR);
+            $stmt->bindValue(':is_locked', false, PDO::PARAM_BOOL);
+            $stmt->bindValue(':locked_time', NULL, PDO::PARAM_STR);
+            $stmt->bindValue(':email', $email, PDO::PARAM_STR);
+            $res = $stmt->execute();
+            if ($res) {
+                // コミット
+                $pdo->commit();
+            } else {
+                throw new Exception("更新に失敗しました。");
+            }
+        } catch (PDOException $e) {
+            throw new PDOException("DBエラーです");
+            return $e->getMessage();
+        } catch (Exception $e) {
+            $pdo->rollBack();
+            return $e->getMessage();
+        } finally {
+            // データベースの接続解除
+            $pdo = null;
+        }
     }
 }

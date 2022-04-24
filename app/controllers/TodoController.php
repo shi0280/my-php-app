@@ -15,9 +15,16 @@ const STATUS = array(
 );
 class TodoController
 {
+    public function __construct()
+    {
+        if (!isset($_SESSION['id'])) {
+            $_SESSION['errors'] = 'ログインしてください。';
+            header("location: /../views/auth/login.php");
+        }
+    }
+
     public static function index()
     {
-        self::check_logined_user();
         $pagination_items = array();
         if (isset($_GET['page']) && is_numeric($_GET['page'])) {
             $page = $_GET['page'];
@@ -301,13 +308,5 @@ class TodoController
             echo "\n";
         }
         exit;
-    }
-
-    private static function check_logined_user()
-    {
-        if (!isset($_SESSION['id'])) {
-            $_SESSION['errors'] = 'ログインしてください。';
-            header("location: /../views/auth/login.php");
-        }
     }
 }

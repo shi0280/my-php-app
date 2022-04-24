@@ -2,6 +2,7 @@
 require(dirname(__FILE__) . '/../../controllers/TodoController.php');
 session_start();
 
+$todo = new TodoController();
 if ($_SERVER['REQUEST_METHOD'] == 'GET') {
     $todo_id = $_GET['todo_id'];
     list($todo, $input, $errors) = TodoController::edit();

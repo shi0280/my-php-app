@@ -2,6 +2,7 @@
 require(dirname(__FILE__) . '/../../controllers/TodoController.php');
 session_start();
 
+$todo = new TodoController();
 if ($_SERVER['REQUEST_METHOD'] == 'GET') {
     list($input, $errors) = TodoController::new();
 } else if ($_SERVER['REQUEST_METHOD'] == 'POST') {

@@ -1,5 +1,6 @@
 <?php
 require(dirname(__FILE__) . '/../../controllers/TodoController.php');
+$todo = new TodoController();
 $todo = TodoController::detail();
 ?>
 

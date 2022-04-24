@@ -1,5 +1,6 @@
 <?php
 require(dirname(__FILE__) . '/../../controllers/TodoController.php');
+$todo = new TodoController();
 list($todos, $pagenation_items, $isCreatingCsv) = TodoController::index();
 $page = $pagenation_items['page'];
 $max_page = $pagenation_items['max_page'];
@@ -175,6 +176,36 @@ $count = $pagenation_items['count'];
             }).always(() => {
                 // ボタンを活性に戻す
                 $('#create-csv').prop("disabled", false);
+            });
+    });
+
+    $(document).on('click', '.delete_todo', function() {
+
+        let todo_id = $(this).data('todo_id');
+        //alert(todo_id);
+
+        // updateStatus.phpファイルへのアクセス
+        $.ajax({
+                type: "POST",
+                url: "../api/deleteTodo.php",
+                data: {
+                    todo_id: $(this).data('todo_id'),
+                    status: $(this).val()
+                },
+                dataType: 'json'
+            })
+            // 成功
+            .done(function(data) {
+                console.log(data);
+                if (data['result'] === "sccess") {
+                    let div_id = "todo-item" + todo_id;
+                    $('#' + div_id).remove();
+                } else {
+                    alert(data['msg']);
+                }
+
+            }).fail(function(XMLHttpRequest, status, e) {
+                alert(e);
             });
     });
 </script>
