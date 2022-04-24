@@ -61,6 +61,7 @@ class AuthController
         }
 
         // ログイン → DBのユーザー情報をセッションに保存
+        User::unlock_login_account($email);
         $_SESSION['id'] = $user['id'];
         $_SESSION['name'] = $user['name'];
         header("location: /../views/todo/index.php");
